@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PZ Academy | Admin Dashboard</title>
+<meta name="robots" content="noindex, nofollow">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700;900&amp;family=Inter:wght@400;500;600&amp;family=Montserrat:wght@800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-variant": "#e1e3e4",
+                    "surface-bright": "#f8f9fa",
+                    "secondary-fixed-dim": "#4ae183",
+                    "tertiary": "#7c3230",
+                    "on-primary-fixed-variant": "#005237",
+                    "on-primary-fixed": "#002114",
+                    "on-background": "#191c1d",
+                    "surface-container-low": "#f3f4f5",
+                    "primary-fixed": "#9cf5c8",
+                    "on-error": "#ffffff",
+                    "on-primary-container": "#97f0c4",
+                    "on-secondary-container": "#00743a",
+                    "surface": "#f8f9fa",
+                    "on-secondary": "#ffffff",
+                    "on-secondary-fixed-variant": "#005228",
+                    "on-surface": "#191c1d",
+                    "error-container": "#ffdad6",
+                    "secondary-container": "#6bfe9c",
+                    "on-primary": "#ffffff",
+                    "on-tertiary-fixed-variant": "#782f2d",
+                    "surface-tint": "#006c4a",
+                    "secondary-fixed": "#6bfe9c",
+                    "secondary": "#006d37",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-container": "#ffd4d0",
+                    "on-secondary-fixed": "#00210c",
+                    "background": "#f8f9fa",
+                    "tertiary-container": "#9a4946",
+                    "inverse-on-surface": "#f0f1f2",
+                    "on-surface-variant": "#3f4943",
+                    "surface-container-high": "#e7e8e9",
+                    "primary-fixed-dim": "#80d8ad",
+                    "on-error-container": "#93000a",
+                    "surface-container": "#edeeef",
+                    "primary-container": "#04704d",
+                    "tertiary-fixed-dim": "#ffb3af",
+                    "surface-container-highest": "#e1e3e4",
+                    "inverse-primary": "#80d8ad",
+                    "surface-dim": "#d9dadb",
+                    "on-tertiary-fixed": "#3e0407",
+                    "primary": "#005539",
+                    "inverse-surface": "#2e3132",
+                    "on-tertiary": "#ffffff",
+                    "tertiary-fixed": "#ffdad7",
+                    "outline-variant": "#bec9c1",
+                    "error": "#ba1a1a",
+                    "outline": "#6f7a72"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Montserrat"],
+                    "body": ["Inter"],
+                    "label": ["Inter"],
+                    "display": ["Public Sans"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { background-color: #f8f9fa; }
+        .clinical-shadow {
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        }
+        .glass-card {
+            background: #ffffff;
+            border: 1px solid rgba(190, 201, 193, 0.2);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        }
+        .glass-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+        .primary-gradient {
+            background: linear-gradient(135deg, #005539 0%, #04704D 100%);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .animate-fadeIn { animation: fadeIn 0.3s ease-out forwards; }
+        .animate-scaleIn { animation: scaleIn 0.2s ease-out forwards; }
+        .sidebar-link { transition: all 0.2s ease; }
+        .sidebar-link:hover { background: rgba(255,255,255,0.1); }
+        .sidebar-link.active { background: rgba(255,255,255,0.15); }
+        .sidebar-gradient { background: linear-gradient(180deg, #04704D 0%, #002114 100%); }
+        .sidebar-gradient { background: linear-gradient(180deg, #04704D 0%, #002114 100%); }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f8f9fa; }
+        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 3px; }
+        @media (max-width: 768px) {
+            .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 40; }
+        }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="font-body text-on-surface antialiased overflow-x-hidden">
+
+    <!-- Session Expired Modal -->
+    <div id="sessionExpiredModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-on-surface/40 backdrop-blur-sm"></div>
+        <div class="relative bg-white w-full max-w-sm rounded-xl p-8 text-center animate-scaleIn shadow-2xl">
+            <div class="w-16 h-16 mx-auto rounded-full bg-error/10 flex items-center justify-center mb-4">
+                <span class="material-symbols-outlined text-3xl text-error">lock_clock</span>
+            </div>
+            <h2 class="font-display font-black text-xl text-on-surface mb-2">Session Expired</h2>
+            <p class="text-on-surface-variant text-sm mb-6">Your session has timed out. Please log in again.</p>
+            <a href="admin-login.html" class="inline-block bg-gradient-to-r from-primary to-primary-container px-8 py-3 rounded-lg text-white font-display font-bold text-sm tracking-wider uppercase shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all">Return to Login</a>
+        </div>
+    </div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebarOverlay" class="sidebar-overlay hidden md:hidden" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed left-0 top-0 h-full w-64 sidebar-gradient flex flex-col py-6 z-50 shadow-xl transform -translate-x-full md:translate-x-0 transition-transform duration-300">
+        <div class="px-6 mb-10">
+            <h1 class="text-xl font-bold tracking-tighter text-white font-headline">PZ Academy</h1>
+            <p class="text-[10px] text-white/60 font-label tracking-widest uppercase mt-1">Clinical Admin Portal</p>
+        </div>
+        <nav class="flex-1 px-3 space-y-1">
+            <a href="admin-dashboard.html" class="sidebar-link active flex items-center px-3 py-2.5 rounded-lg text-white">
+                <span class="material-symbols-outlined mr-3 text-sm" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+                <span class="font-display font-semibold text-sm tracking-tight">Dashboard</span>
+            </a>
+            <a href="admin-students.html" class="sidebar-link flex items-center px-3 py-2.5 rounded-lg text-white/70 hover:text-white">
+                <span class="material-symbols-outlined mr-3 text-sm">group</span>
+                <span class="font-display font-medium text-sm tracking-tight">Students</span>
+            </a>
+            <a href="admin-course-manager.html" class="sidebar-link flex items-center px-3 py-2.5 rounded-lg text-white/70 hover:text-white">
+                <span class="material-symbols-outlined mr-3 text-sm">school</span>
+                <span class="font-display font-medium text-sm tracking-tight">Courses</span>
+            </a>
+            <a href="admin-quiz-builder.html" class="sidebar-link flex items-center px-3 py-2.5 rounded-lg text-white/70 hover:text-white">
+                <span class="material-symbols-outlined mr-3 text-sm">quiz</span>
+                <span class="font-display font-medium text-sm tracking-tight">Quiz Builder</span>
+            </a>
+            <a href="admin-certificates.html" class="sidebar-link flex items-center px-3 py-2.5 rounded-lg text-white/70 hover:text-white">
+                <span class="material-symbols-outlined mr-3 text-sm">workspace_premium</span>
+                <span class="font-display font-medium text-sm tracking-tight">Certificates</span>
+            </a>
+            <a href="admin-settings.html" class="sidebar-link flex items-center px-3 py-2.5 rounded-lg text-white/70 hover:text-white">
+                <span class="material-symbols-outlined mr-3 text-sm">settings</span>
+                <span class="font-display font-medium text-sm tracking-tight">Settings</span>
+            </a>
+        </nav>
+        <div class="px-6 mt-auto">
+            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 flex items-center gap-3">
+                <div id="sidebarAvatar" class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-xs font-display font-bold text-white ring-2 ring-white/20 flex-shrink-0">SA</div>
+                <div class="overflow-hidden flex-1 min-w-0">
+                    <p id="sidebarName" class="text-white text-xs font-bold truncate">Super Administrator</p>
+                    <p id="sidebarRole" class="text-white/60 text-[10px] truncate">Super Admin</p>
+                </div>
+                <button onclick="showLogoutModal()" class="text-white/60 hover:text-white transition-opacity flex-shrink-0">
+                    <span class="material-symbols-outlined text-sm">logout</span>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="ml-0 md:ml-64 min-h-screen bg-[#f8f9fa]">
+        <!-- Top Bar -->
+        <header class="fixed top-0 right-0 md:left-64 left-0 z-40 h-16 px-4 md:px-8 flex justify-between items-center bg-[#f8f9fa]/80 backdrop-blur-md border-b border-outline-variant/15">
+            <div class="flex items-center gap-4 flex-1">
+                <button onclick="toggleSidebar()" class="md:hidden p-2 rounded-lg text-on-surface-variant hover:bg-on-surface/5 transition-colors">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+                <h2 class="font-display text-on-surface font-black text-lg md:text-xl tracking-tight hidden sm:block">Admin Dashboard</h2>
+                <div class="max-w-md w-full relative hidden md:block">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant text-sm">search</span>
+                    <input class="w-full bg-surface-container border-none rounded-lg py-2 pl-10 pr-4 text-sm text-on-surface focus:ring-1 focus:ring-primary placeholder:text-outline-variant" placeholder="Search students, courses or logs..." type="text"/>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:bg-on-surface/5 rounded-full transition-colors relative">
+                    <span class="material-symbols-outlined">notifications</span>
+                    <span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full ring-2 ring-[#f8f9fa]"></span>
+                </button>
+                <div id="topAvatar" class="w-10 h-10 rounded-full primary-gradient flex items-center justify-center text-xs font-display font-bold text-white hidden md:flex">SA</div>
+            </div>
+        </header>
+
+        <div class="pt-24 pb-12 px-4 md:px-8 space-y-8">
+            <!-- Stats Row -->
+            <section>
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="font-display text-on-surface font-bold text-lg tracking-tight">Performance Metrics</h2>
+                    <span class="text-[10px] uppercase tracking-widest text-outline-variant">Live Updates</span>
+                </div>
+                <div class="flex gap-4 overflow-x-auto pb-4 scrollbar-hide -mx-4 md:mx-0 px-4 md:px-0 md:grid md:grid-cols-4 md:gap-6">
+                    <div class="glass-card p-6 rounded-xl space-y-4 min-w-[160px] md:min-w-0">
+                        <div class="flex justify-between items-start">
+                            <div class="p-2 bg-primary-container/10 rounded-lg text-primary">
+                                <span class="material-symbols-outlined">group</span>
+                            </div>
+                            <span class="text-primary text-xs font-bold flex items-center bg-primary/5 px-1.5 py-0.5 rounded">
+                                <span class="material-symbols-outlined text-xs mr-1">trending_up</span> +12%
+                            </span>
+                        </div>
+                        <div>
+                            <p class="text-on-surface-variant text-xs font-medium uppercase tracking-wider">Total Students</p>
+                            <h3 class="text-on-surface text-3xl font-display font-black">247</h3>
+                        </div>
+                    </div>
+                    <div class="glass-card p-6 rounded-xl space-y-4 min-w-[160px] md:min-w-0">
+                        <div class="flex justify-between items-start">
+                            <div class="p-2 bg-secondary/10 rounded-lg text-secondary">
+                                <span class="material-symbols-outlined">auto_stories</span>
+                            </div>
+                            <span class="text-secondary text-xs font-bold flex items-center bg-secondary/5 px-1.5 py-0.5 rounded">
+                                <span class="material-symbols-outlined text-xs mr-1">check_circle</span> Stable
+                            </span>
+                        </div>
+                        <div>
+                            <p class="text-on-surface-variant text-xs font-medium uppercase tracking-wider">Active Courses</p>
+                            <h3 class="text-on-surface text-3xl font-display font-black">4</h3>
+                        </div>
+                    </div>
+                    <div class="glass-card p-6 rounded-xl space-y-4 min-w-[160px] md:min-w-0">
+                        <div class="flex justify-between items-start">
+                            <div class="p-2 bg-primary/10 rounded-lg text-primary">
+                                <span class="material-symbols-outlined">task_alt</span>
+                            </div>
+                            <span class="text-primary text-xs font-bold flex items-center bg-primary/5 px-1.5 py-0.5 rounded">
+                                <span class="material-symbols-outlined text-xs mr-1">trending_up</span> +5%
+                            </span>
+                        </div>
+                        <div>
+                            <p class="text-on-surface-variant text-xs font-medium uppercase tracking-wider">Completion Rate</p>
+                            <h3 class="text-on-surface text-3xl font-display font-black">68%</h3>
+                        </div>
+                    </div>
+                    <div class="glass-card p-6 rounded-xl space-y-4 min-w-[160px] md:min-w-0">
+                        <div class="flex justify-between items-start">
+                            <div class="p-2 bg-tertiary-container/10 rounded-lg text-tertiary">
+                                <span class="material-symbols-outlined">leaderboard</span>
+                            </div>
+                            <span class="text-error text-xs font-bold flex items-center bg-error/5 px-1.5 py-0.5 rounded">
+                                <span class="material-symbols-outlined text-xs mr-1">trending_down</span> -2%
+                            </span>
+                        </div>
+                        <div>
+                            <p class="text-on-surface-variant text-xs font-medium uppercase tracking-wider">Avg Quiz Score</p>
+                            <h3 class="text-on-surface text-3xl font-display font-black">74%</h3>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quick Actions -->
+            <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <a href="admin-course-manager.html" class="group p-4 glass-card rounded-xl flex items-center gap-4 hover:bg-primary-container/5 transition-all duration-300">
+                    <div class="w-10 h-10 primary-gradient rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
+                        <span class="material-symbols-outlined text-white">add_box</span>
+                    </div>
+                    <span class="text-sm font-bold text-on-surface">Add Course</span>
+                </a>
+                <a href="admin-quiz-builder.html" class="group p-4 glass-card rounded-xl flex items-center gap-4 hover:bg-primary-container/5 transition-all duration-300">
+                    <div class="w-10 h-10 primary-gradient rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
+                        <span class="material-symbols-outlined text-white">stylus</span>
+                    </div>
+                    <span class="text-sm font-bold text-on-surface">Create Quiz</span>
+                </a>
+                <a href="admin-students.html" class="group p-4 glass-card rounded-xl flex items-center gap-4 hover:bg-primary-container/5 transition-all duration-300">
+                    <div class="w-10 h-10 primary-gradient rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
+                        <span class="material-symbols-outlined text-white">visibility</span>
+                    </div>
+                    <span class="text-sm font-bold text-on-surface">View Students</span>
+                </a>
+                <a href="#" class="group p-4 glass-card rounded-xl flex items-center gap-4 hover:bg-primary-container/5 transition-all duration-300">
+                    <div class="w-10 h-10 primary-gradient rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
+                        <span class="material-symbols-outlined text-white">file_download</span>
+                    </div>
+                    <span class="text-sm font-bold text-on-surface">Export Report</span>
+                </a>
+            </section>
+
+            <!-- Bottom Section -->
+            <section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Recent Activity -->
+                <div class="lg:col-span-2 glass-card rounded-xl overflow-hidden flex flex-col">
+                    <div class="p-6 border-b border-outline-variant/15 flex justify-between items-center">
+                        <h4 class="font-display font-bold text-on-surface">Recent Activity</h4>
+                        <button class="text-xs text-primary font-bold hover:underline">View All</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="text-outline-variant text-[10px] uppercase tracking-widest border-b border-outline-variant/15">
+                                    <th class="px-6 py-4 font-semibold">Student</th>
+                                    <th class="px-6 py-4 font-semibold">Activity</th>
+                                    <th class="px-6 py-4 font-semibold">Course</th>
+                                    <th class="px-6 py-4 font-semibold text-right">Time</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-outline-variant/10">
+                                <tr class="hover:bg-surface-container/50 transition-colors">
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-full primary-gradient flex items-center justify-center text-[10px] font-display font-bold text-white flex-shrink-0">JM</div>
+                                            <span class="text-xs font-bold text-on-surface">Julian Mark</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-2 py-1 bg-secondary-container/20 text-on-secondary-container text-[10px] font-bold rounded uppercase">Quiz Passed</span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="text-xs text-on-surface-variant">Advanced Pharmacology II</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <span class="text-[10px] text-outline-variant">2m ago</span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-surface-container/50 transition-colors">
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-display font-bold text-primary flex-shrink-0">ER</div>
+                                            <span class="text-xs font-bold text-on-surface">Elena Rodriguez</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-2 py-1 bg-primary-container/10 text-primary text-[10px] font-bold rounded uppercase">Course Enrolled</span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="text-xs text-on-surface-variant">Clinical Diagnostics</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <span class="text-[10px] text-outline-variant">15m ago</span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-surface-container/50 transition-colors">
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-full bg-tertiary-container/10 flex items-center justify-center text-[10px] font-display font-bold text-tertiary flex-shrink-0">DT</div>
+                                            <span class="text-xs font-bold text-on-surface">David Thorne</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-2 py-1 bg-tertiary-container/10 text-tertiary text-[10px] font-bold rounded uppercase">Module Started</span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="text-xs text-on-surface-variant">Neuroanatomy Essentials</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <span class="text-[10px] text-outline-variant">1h ago</span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-surface-container/50 transition-colors">
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-display font-bold text-primary flex-shrink-0">SJ</div>
+                                            <span class="text-xs font-bold text-on-surface">Sarah Jenkins</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-2 py-1 bg-secondary-container/20 text-on-secondary-container text-[10px] font-bold rounded uppercase">Certificate Issued</span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="text-xs text-on-surface-variant">Patient Ethics 101</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <span class="text-[10px] text-outline-variant">3h ago</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="space-y-8">
+                    <!-- Course Progress -->
+                    <div class="glass-card rounded-xl p-6">
+                        <h4 class="font-display font-bold text-on-surface mb-6">Course Progress</h4>
+                        <div class="space-y-6">
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center text-xs">
+                                    <span class="text-on-surface-variant font-medium">Pharmacology Advanced</span>
+                                    <span class="text-on-surface font-bold">84%</span>
+                                </div>
+                                <div class="w-full bg-surface-container-highest h-1.5 rounded-full overflow-hidden">
+                                    <div class="bg-secondary h-full w-[84%] rounded-full"></div>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center text-xs">
+                                    <span class="text-on-surface-variant font-medium">Clinical Ethics</span>
+                                    <span class="text-on-surface font-bold">42%</span>
+                                </div>
+                                <div class="w-full bg-surface-container-highest h-1.5 rounded-full overflow-hidden">
+                                    <div class="bg-primary h-full w-[42%] rounded-full"></div>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center text-xs">
+                                    <span class="text-on-surface-variant font-medium">Surgical Prep</span>
+                                    <span class="text-on-surface font-bold">12%</span>
+                                </div>
+                                <div class="w-full bg-surface-container-highest h-1.5 rounded-full overflow-hidden">
+                                    <div class="bg-tertiary h-full w-[12%] rounded-full"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top Students -->
+                    <div class="glass-card rounded-xl p-6">
+                        <h4 class="font-display font-bold text-on-surface mb-6">Top Students</h4>
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-4 group">
+                                <div class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-display font-bold text-xs">01</div>
+                                <div class="w-8 h-8 rounded-full primary-gradient flex items-center justify-center text-[10px] font-display font-bold text-white flex-shrink-0">AV</div>
+                                <div class="flex-1">
+                                    <p class="text-xs font-bold text-on-surface">Alice Vossen</p>
+                                    <p class="text-[10px] text-outline-variant">98.4 pts</p>
+                                </div>
+                                <span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+                            </div>
+                            <div class="flex items-center gap-4 group">
+                                <div class="w-8 h-8 rounded-lg bg-surface-container text-outline-variant flex items-center justify-center font-display font-bold text-xs">02</div>
+                                <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-display font-bold text-primary flex-shrink-0">MS</div>
+                                <div class="flex-1">
+                                    <p class="text-xs font-bold text-on-surface">Marcus Sterling</p>
+                                    <p class="text-[10px] text-outline-variant">96.1 pts</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4 group">
+                                <div class="w-8 h-8 rounded-lg bg-surface-container text-outline-variant flex items-center justify-center font-display font-bold text-xs">03</div>
+                                <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-display font-bold text-primary flex-shrink-0">CZ</div>
+                                <div class="flex-1">
+                                    <p class="text-xs font-bold text-on-surface">Chloe Zhang</p>
+                                    <p class="text-[10px] text-outline-variant">94.8 pts</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4 group">
+                                <div class="w-8 h-8 rounded-lg bg-surface-container text-outline-variant flex items-center justify-center font-display font-bold text-xs">04</div>
+                                <div class="w-8 h-8 rounded-full bg-tertiary-container/10 flex items-center justify-center text-[10px] font-display font-bold text-tertiary flex-shrink-0">LM</div>
+                                <div class="flex-1">
+                                    <p class="text-xs font-bold text-on-surface">Leo Moretti</p>
+                                    <p class="text-[10px] text-outline-variant">92.3 pts</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- FAB -->
+    <button class="fixed bottom-8 right-8 w-14 h-14 primary-gradient rounded-xl shadow-2xl flex items-center justify-center text-white hover:scale-105 active:scale-95 transition-all z-50">
+        <span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">add</span>
+    </button>
+
+    <!-- Logout Confirmation Modal -->
+    <div id="logoutModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-on-surface/40 backdrop-blur-sm" onclick="closeLogoutModal()"></div>
+        <div class="relative bg-white w-full max-w-sm rounded-xl p-6 animate-scaleIn shadow-2xl">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                    <span class="material-symbols-outlined text-3xl text-primary">logout</span>
+                </div>
+                <h3 class="font-display font-black text-xl text-on-surface mb-2">Sign Out?</h3>
+                <p class="text-on-surface-variant text-sm">Are you sure you want to sign out of your admin session?</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="closeLogoutModal()" class="flex-1 px-4 py-3 rounded-lg border border-outline-variant text-on-surface text-sm font-semibold hover:bg-surface-container transition-colors">Cancel</button>
+                <button onclick="confirmLogout()" class="flex-1 px-4 py-3 rounded-lg bg-error text-white text-sm font-semibold hover:bg-error/90 transition-colors">Sign Out</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function checkSession() {
+            const session = sessionStorage.getItem('pz_admin_session');
+            if (!session) { showSessionExpired(); return null; }
+            const data = JSON.parse(session);
+            if (Date.now() > data.expiresAt) { sessionStorage.removeItem('pz_admin_session'); showSessionExpired(); return null; }
+            return data;
+        }
+
+        function showSessionExpired() {
+            document.getElementById('sessionExpiredModal').classList.remove('hidden');
+            document.getElementById('sessionExpiredModal').classList.add('flex');
+        }
+
+        function populateAdminInfo(admin) {
+            const initials = admin.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+            const roleLabel = admin.role.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+            document.getElementById('sidebarName').textContent = admin.name;
+            document.getElementById('sidebarRole').textContent = roleLabel;
+            document.getElementById('sidebarAvatar').textContent = initials;
+            const topAvatar = document.getElementById('topAvatar');
+            if (topAvatar) topAvatar.textContent = initials;
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        function handleLogout() {
+            sessionStorage.removeItem('pz_admin_session');
+            window.location.href = 'admin-login.html';
+        }
+
+        function showLogoutModal() {
+            const modal = document.getElementById('logoutModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeLogoutModal() {
+            const modal = document.getElementById('logoutModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function confirmLogout() {
+            closeLogoutModal();
+            setTimeout(() => {
+                sessionStorage.removeItem('pz_admin_session');
+                window.location.href = 'admin-login.html';
+            }, 300);
+        }
+
+        const admin = checkSession();
+        if (admin) { populateAdminInfo(admin); }
+    </script>
+</body>
+</html>
