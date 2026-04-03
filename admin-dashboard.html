@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | PZ Academy</title>
+    <meta name="robots" content="noindex, nofollow">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@400;500;600&family=Public+Sans:wght@600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#005539',
+                        'primary-container': '#04704d',
+                        'primary-fixed': '#9cf5c8',
+                        'secondary': '#006d37',
+                        'secondary-container': '#6bfe9c',
+                        'dark-navy': '#1a1a2e',
+                        'sidebar': '#12122a',
+                        'sidebar-hover': '#1e1e3a',
+                        'card-dark': '#1e1e38',
+                        'card-border': 'rgba(255,255,255,0.06)'
+                    },
+                    fontFamily: {
+                        'headline': ['Montserrat', 'sans-serif'],
+                        'body': ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .silk-gradient {
+            background: linear-gradient(135deg, #005539 0%, #04704d 100%);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(190, 201, 193, 0.1);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        .animate-fadeIn-delay {
+            animation: fadeIn 0.4s ease-out 0.1s forwards;
+            opacity: 0;
+        }
+        .animate-fadeIn-delay-2 {
+            animation: fadeIn 0.4s ease-out 0.2s forwards;
+            opacity: 0;
+        }
+        .animate-fadeIn-delay-3 {
+            animation: fadeIn 0.4s ease-out 0.3s forwards;
+            opacity: 0;
+        }
+        .sidebar-link {
+            transition: all 0.2s ease;
+        }
+        .sidebar-link:hover {
+            background: rgba(4, 112, 77, 0.15);
+        }
+        .sidebar-link.active {
+            background: linear-gradient(90deg, rgba(0, 85, 57, 0.4) 0%, rgba(4, 112, 77, 0.1) 100%);
+            border-right: 3px solid #04704d;
+        }
+        .stat-card {
+            transition: all 0.2s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        .quick-action-btn {
+            transition: all 0.2s ease;
+        }
+        .quick-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 85, 57, 0.3);
+        }
+        .activity-row {
+            transition: background 0.15s ease;
+        }
+        .activity-row:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #12122a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2a2a4a;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3a3a5a;
+        }
+        @media (max-width: 768px) {
+            .sidebar-overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.6);
+                z-index: 40;
+            }
+        }
+    </style>
+</head>
+<body class="bg-dark-navy font-body text-white antialiased min-h-screen">
+
+    <!-- Session Expired Modal -->
+    <div id="sessionExpiredModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
+        <div class="relative glass-card w-full max-w-sm rounded-2xl p-8 text-center animate-fadeIn">
+            <div class="w-16 h-16 mx-auto rounded-full bg-red-500/20 flex items-center justify-center mb-4">
+                <span class="material-symbols-outlined text-3xl text-red-400">lock_clock</span>
+            </div>
+            <h2 class="font-headline text-xl font-bold mb-2">Session Expired</h2>
+            <p class="text-white/50 text-sm mb-6">Your session has timed out. Please log in again.</p>
+            <a href="admin-login.html" class="inline-block silk-gradient px-8 py-3 rounded-xl text-white font-headline font-bold text-sm tracking-wider uppercase shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all">
+                Return to Login
+            </a>
+        </div>
+    </div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebarOverlay" class="sidebar-overlay hidden md:hidden" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed top-0 left-0 h-full w-[260px] bg-sidebar border-r border-card-border z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 flex flex-col">
+        <!-- Logo -->
+        <div class="px-6 py-5 border-b border-card-border">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg silk-gradient flex items-center justify-center">
+                    <img src="https://placehold.co/40x40/04704d/ffffff?text=PZ" alt="PZ" class="w-7 h-7 object-contain rounded"/>
+                </div>
+                <div>
+                    <h1 class="font-headline font-bold text-base tracking-tight">PZ Academy</h1>
+                    <p class="text-[9px] text-primary-container/60 uppercase tracking-[0.15em]">Admin Portal</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+            <p class="px-3 mb-2 text-[9px] text-white/30 uppercase tracking-widest font-semibold">Main</p>
+            <a href="admin-dashboard.html" class="sidebar-link active flex items-center gap-3 px-3 py-2.5 rounded-lg text-white">
+                <span class="material-symbols-outlined text-primary-container">dashboard</span>
+                <span class="text-sm font-medium">Dashboard</span>
+            </a>
+            <a href="admin-students.html" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/60 hover:text-white">
+                <span class="material-symbols-outlined">group</span>
+                <span class="text-sm font-medium">Students</span>
+                <span class="ml-auto text-[10px] bg-primary/30 text-primary-fixed px-2 py-0.5 rounded-full">247</span>
+            </a>
+            <a href="admin-course-manager.html" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/60 hover:text-white">
+                <span class="material-symbols-outlined">menu_book</span>
+                <span class="text-sm font-medium">Courses</span>
+            </a>
+            <a href="admin-quiz-builder.html" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/60 hover:text-white">
+                <span class="material-symbols-outlined">quiz</span>
+                <span class="text-sm font-medium">Quiz Builder</span>
+            </a>
+
+            <p class="px-3 mt-6 mb-2 text-[9px] text-white/30 uppercase tracking-widest font-semibold">Management</p>
+            <a href="#" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/60 hover:text-white">
+                <span class="material-symbols-outlined">workspace_premium</span>
+                <span class="text-sm font-medium">Certificates</span>
+            </a>
+            <a href="#" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/60 hover:text-white">
+                <span class="material-symbols-outlined">receipt_long</span>
+                <span class="text-sm font-medium">Payments</span>
+            </a>
+            <a href="#" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/60 hover:text-white">
+                <span class="material-symbols-outlined">history</span>
+                <span class="text-sm font-medium">Audit Logs</span>
+            </a>
+
+            <p class="px-3 mt-6 mb-2 text-[9px] text-white/30 uppercase tracking-widest font-semibold">System</p>
+            <a href="#" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/60 hover:text-white">
+                <span class="material-symbols-outlined">settings</span>
+                <span class="text-sm font-medium">Settings</span>
+            </a>
+            <a href="#" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/60 hover:text-white">
+                <span class="material-symbols-outlined">admin_panel_settings</span>
+                <span class="text-sm font-medium">Admin Users</span>
+            </a>
+        </nav>
+
+        <!-- Admin Profile -->
+        <div class="px-4 py-4 border-t border-card-border">
+            <div class="flex items-center gap-3">
+                <div id="adminAvatar" class="w-9 h-9 rounded-full silk-gradient flex items-center justify-center text-xs font-headline font-bold">SA</div>
+                <div class="flex-1 min-w-0">
+                    <p id="adminName" class="text-sm font-medium truncate">Super Administrator</p>
+                    <p id="adminRole" class="text-[10px] text-primary-container/70 uppercase tracking-wider">Super Admin</p>
+                </div>
+                <button onclick="handleLogout()" class="p-1.5 rounded-lg hover:bg-white/5 text-white/40 hover:text-red-400 transition-colors" title="Logout">
+                    <span class="material-symbols-outlined text-lg">logout</span>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="md:ml-[260px] min-h-screen">
+        <!-- Top Bar -->
+        <header class="sticky top-0 z-30 bg-dark-navy/80 backdrop-blur-xl border-b border-card-border">
+            <div class="flex items-center justify-between px-4 md:px-8 py-4">
+                <div class="flex items-center gap-4">
+                    <!-- Mobile Menu Toggle -->
+                    <button onclick="toggleSidebar()" class="md:hidden p-2 rounded-lg hover:bg-white/5 text-white/60">
+                        <span class="material-symbols-outlined">menu</span>
+                    </button>
+                    <div>
+                        <h2 class="font-headline text-xl font-bold">Dashboard</h2>
+                        <p class="text-white/40 text-xs hidden sm:block">Welcome back! Here's what's happening today.</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <!-- Search -->
+                    <div class="hidden md:flex items-center bg-white/5 rounded-xl px-4 py-2 border border-card-border focus-within:border-primary/50 transition-colors">
+                        <span class="material-symbols-outlined text-white/30 text-lg mr-2">search</span>
+                        <input type="text" placeholder="Search students, courses..." class="bg-transparent border-none outline-none text-sm text-white placeholder:text-white/30 w-56"/>
+                    </div>
+                    <!-- Notifications -->
+                    <button class="relative p-2 rounded-lg hover:bg-white/5 text-white/60 transition-colors">
+                        <span class="material-symbols-outlined">notifications</span>
+                        <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                    </button>
+                    <!-- Mobile Avatar -->
+                    <div class="md:hidden w-8 h-8 rounded-full silk-gradient flex items-center justify-center text-[10px] font-headline font-bold" id="mobileAvatar">SA</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Content -->
+        <main class="p-4 md:p-8 space-y-6">
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6">
+                <!-- Total Students -->
+                <div class="stat-card glass-card rounded-2xl p-5 animate-fadeIn">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-11 h-11 rounded-xl bg-primary/20 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-primary-container">group</span>
+                        </div>
+                        <span class="flex items-center gap-1 text-[10px] text-green-400 bg-green-400/10 px-2 py-1 rounded-full">
+                            <span class="material-symbols-outlined text-xs">trending_up</span>
+                            +12%
+                        </span>
+                    </div>
+                    <p class="text-2xl font-headline font-bold mb-1">247</p>
+                    <p class="text-white/40 text-xs">Total Students</p>
+                </div>
+
+                <!-- Active Courses -->
+                <div class="stat-card glass-card rounded-2xl p-5 animate-fadeIn-delay">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-11 h-11 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-blue-400">menu_book</span>
+                        </div>
+                        <span class="flex items-center gap-1 text-[10px] text-green-400 bg-green-400/10 px-2 py-1 rounded-full">
+                            <span class="material-symbols-outlined text-xs">trending_up</span>
+                            +2
+                        </span>
+                    </div>
+                    <p class="text-2xl font-headline font-bold mb-1">4</p>
+                    <p class="text-white/40 text-xs">Active Courses</p>
+                </div>
+
+                <!-- Completion Rate -->
+                <div class="stat-card glass-card rounded-2xl p-5 animate-fadeIn-delay-2">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-11 h-11 rounded-xl bg-amber-500/20 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-amber-400">analytics</span>
+                        </div>
+                        <span class="flex items-center gap-1 text-[10px] text-red-400 bg-red-400/10 px-2 py-1 rounded-full">
+                            <span class="material-symbols-outlined text-xs">trending_down</span>
+                            -3%
+                        </span>
+                    </div>
+                    <p class="text-2xl font-headline font-bold mb-1">68%</p>
+                    <p class="text-white/40 text-xs">Completion Rate</p>
+                </div>
+
+                <!-- Avg Quiz Score -->
+                <div class="stat-card glass-card rounded-2xl p-5 animate-fadeIn-delay-3">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-11 h-11 rounded-xl bg-purple-500/20 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-purple-400">quiz</span>
+                        </div>
+                        <span class="flex items-center gap-1 text-[10px] text-green-400 bg-green-400/10 px-2 py-1 rounded-full">
+                            <span class="material-symbols-outlined text-xs">trending_up</span>
+                            +5%
+                        </span>
+                    </div>
+                    <p class="text-2xl font-headline font-bold mb-1">74%</p>
+                    <p class="text-white/40 text-xs">Avg Quiz Score</p>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="animate-fadeIn-delay-3">
+                <h3 class="font-headline text-base font-bold mb-4">Quick Actions</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <a href="admin-course-manager.html" class="quick-action-btn glass-card rounded-xl p-4 text-center group">
+                        <div class="w-10 h-10 mx-auto rounded-lg bg-primary/20 flex items-center justify-center mb-3 group-hover:bg-primary/30 transition-colors">
+                            <span class="material-symbols-outlined text-primary-container">add_circle</span>
+                        </div>
+                        <p class="text-xs font-medium text-white/80">Add Course</p>
+                    </a>
+                    <a href="admin-quiz-builder.html" class="quick-action-btn glass-card rounded-xl p-4 text-center group">
+                        <div class="w-10 h-10 mx-auto rounded-lg bg-blue-500/20 flex items-center justify-center mb-3 group-hover:bg-blue-500/30 transition-colors">
+                            <span class="material-symbols-outlined text-blue-400">quiz</span>
+                        </div>
+                        <p class="text-xs font-medium text-white/80">Create Quiz</p>
+                    </a>
+                    <a href="admin-students.html" class="quick-action-btn glass-card rounded-xl p-4 text-center group">
+                        <div class="w-10 h-10 mx-auto rounded-lg bg-amber-500/20 flex items-center justify-center mb-3 group-hover:bg-amber-500/30 transition-colors">
+                            <span class="material-symbols-outlined text-amber-400">people</span>
+                        </div>
+                        <p class="text-xs font-medium text-white/80">View Students</p>
+                    </a>
+                    <a href="#" class="quick-action-btn glass-card rounded-xl p-4 text-center group">
+                        <div class="w-10 h-10 mx-auto rounded-lg bg-purple-500/20 flex items-center justify-center mb-3 group-hover:bg-purple-500/30 transition-colors">
+                            <span class="material-symbols-outlined text-purple-400">download</span>
+                        </div>
+                        <p class="text-xs font-medium text-white/80">Export Report</p>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Two Column Layout -->
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                <!-- Recent Activity (2 cols) -->
+                <div class="xl:col-span-2 glass-card rounded-2xl p-5 animate-fadeIn-delay-2">
+                    <div class="flex items-center justify-between mb-5">
+                        <h3 class="font-headline text-base font-bold">Recent Activity</h3>
+                        <a href="#" class="text-xs text-primary-container hover:text-primary-fixed transition-colors">View All</a>
+                    </div>
+                    <div class="space-y-0">
+                        <!-- Activity Header -->
+                        <div class="hidden md:grid grid-cols-12 gap-4 px-3 pb-3 text-[10px] text-white/30 uppercase tracking-wider font-semibold">
+                            <div class="col-span-4">Student</div>
+                            <div class="col-span-3">Action</div>
+                            <div class="col-span-3">Course</div>
+                            <div class="col-span-2 text-right">Time</div>
+                        </div>
+                        <!-- Activity Rows -->
+                        <div class="space-y-1">
+                            <div class="activity-row grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 px-3 py-3 rounded-lg items-center">
+                                <div class="md:col-span-4 flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-headline font-bold text-primary-container flex-shrink-0">JD</div>
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium truncate">Juan Dela Cruz</p>
+                                        <p class="text-[10px] text-white/30 md:hidden">Completed lesson</p>
+                                    </div>
+                                </div>
+                                <div class="md:col-span-3">
+                                    <span class="inline-flex items-center gap-1.5 text-xs text-green-400">
+                                        <span class="material-symbols-outlined text-sm">check_circle</span>
+                                        Completed lesson
+                                    </span>
+                                </div>
+                                <div class="md:col-span-3">
+                                    <p class="text-xs text-white/60">Safe Prescribing</p>
+                                </div>
+                                <div class="md:col-span-2 text-right">
+                                    <p class="text-[10px] text-white/30">2 min ago</p>
+                                </div>
+                            </div>
+
+                            <div class="activity-row grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 px-3 py-3 rounded-lg items-center">
+                                <div class="md:col-span-4 flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-[10px] font-headline font-bold text-blue-400 flex-shrink-0">MR</div>
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium truncate">Maria Reyes</p>
+                                        <p class="text-[10px] text-white/30 md:hidden">Passed quiz</p>
+                                    </div>
+                                </div>
+                                <div class="md:col-span-3">
+                                    <span class="inline-flex items-center gap-1.5 text-xs text-primary-container">
+                                        <span class="material-symbols-outlined text-sm">emoji_events</span>
+                                        Passed quiz (85%)
+                                    </span>
+                                </div>
+                                <div class="md:col-span-3">
+                                    <p class="text-xs text-white/60">Clinical Therapeutics</p>
+                                </div>
+                                <div class="md:col-span-2 text-right">
+                                    <p class="text-[10px] text-white/30">15 min ago</p>
+                                </div>
+                            </div>
+
+                            <div class="activity-row grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 px-3 py-3 rounded-lg items-center">
+                                <div class="md:col-span-4 flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center text-[10px] font-headline font-bold text-amber-400 flex-shrink-0">AS</div>
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium truncate">Ana Santos</p>
+                                        <p class="text-[10px] text-white/30 md:hidden">New registration</p>
+                                    </div>
+                                </div>
+                                <div class="md:col-span-3">
+                                    <span class="inline-flex items-center gap-1.5 text-xs text-amber-400">
+                                        <span class="material-symbols-outlined text-sm">person_add</span>
+                                        New registration
+                                    </span>
+                                </div>
+                                <div class="md:col-span-3">
+                                    <p class="text-xs text-white/60">IV Therapy & Safety</p>
+                                </div>
+                                <div class="md:col-span-2 text-right">
+                                    <p class="text-[10px] text-white/30">1 hr ago</p>
+                                </div>
+                            </div>
+
+                            <div class="activity-row grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 px-3 py-3 rounded-lg items-center">
+                                <div class="md:col-span-4 flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center text-[10px] font-headline font-bold text-purple-400 flex-shrink-0">PG</div>
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium truncate">Pedro Garcia</p>
+                                        <p class="text-[10px] text-white/30 md:hidden">Earned certificate</p>
+                                    </div>
+                                </div>
+                                <div class="md:col-span-3">
+                                    <span class="inline-flex items-center gap-1.5 text-xs text-purple-400">
+                                        <span class="material-symbols-outlined text-sm">workspace_premium</span>
+                                        Earned certificate
+                                    </span>
+                                </div>
+                                <div class="md:col-span-3">
+                                    <p class="text-xs text-white/60">Safe Prescribing</p>
+                                </div>
+                                <div class="md:col-span-2 text-right">
+                                    <p class="text-[10px] text-white/30">3 hrs ago</p>
+                                </div>
+                            </div>
+
+                            <div class="activity-row grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 px-3 py-3 rounded-lg items-center">
+                                <div class="md:col-span-4 flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center text-[10px] font-headline font-bold text-red-400 flex-shrink-0">LM</div>
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium truncate">Luisa Mendoza</p>
+                                        <p class="text-[10px] text-white/30 md:hidden">Failed quiz (retry)</p>
+                                    </div>
+                                </div>
+                                <div class="md:col-span-3">
+                                    <span class="inline-flex items-center gap-1.5 text-xs text-red-400">
+                                        <span class="material-symbols-outlined text-sm">cancel</span>
+                                        Failed quiz (45%)
+                                    </span>
+                                </div>
+                                <div class="md:col-span-3">
+                                    <p class="text-xs text-white/60">Special Populations</p>
+                                </div>
+                                <div class="md:col-span-2 text-right">
+                                    <p class="text-[10px] text-white/30">5 hrs ago</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="space-y-6">
+                    <!-- Course Progress Overview -->
+                    <div class="glass-card rounded-2xl p-5 animate-fadeIn-delay-2">
+                        <h3 class="font-headline text-base font-bold mb-4">Course Progress</h3>
+                        <div class="space-y-4">
+                            <!-- Course 1 -->
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <p class="text-xs font-medium">Safe Prescribing</p>
+                                    <p class="text-[10px] text-primary-container font-semibold">78%</p>
+                                </div>
+                                <div class="w-full h-2 bg-white/5 rounded-full overflow-hidden">
+                                    <div class="h-full silk-gradient rounded-full" style="width: 78%"></div>
+                                </div>
+                                <p class="text-[10px] text-white/30 mt-1">42 of 54 students active</p>
+                            </div>
+                            <!-- Course 2 -->
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <p class="text-xs font-medium">Clinical Therapeutics</p>
+                                    <p class="text-[10px] text-blue-400 font-semibold">65%</p>
+                                </div>
+                                <div class="w-full h-2 bg-white/5 rounded-full overflow-hidden">
+                                    <div class="h-full bg-gradient-to-r from-blue-600 to-blue-400 rounded-full" style="width: 65%"></div>
+                                </div>
+                                <p class="text-[10px] text-white/30 mt-1">38 of 58 students active</p>
+                            </div>
+                            <!-- Course 3 -->
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <p class="text-xs font-medium">Special Populations</p>
+                                    <p class="text-[10px] text-amber-400 font-semibold">52%</p>
+                                </div>
+                                <div class="w-full h-2 bg-white/5 rounded-full overflow-hidden">
+                                    <div class="h-full bg-gradient-to-r from-amber-600 to-amber-400 rounded-full" style="width: 52%"></div>
+                                </div>
+                                <p class="text-[10px] text-white/30 mt-1">28 of 54 students active</p>
+                            </div>
+                            <!-- Course 4 -->
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <p class="text-xs font-medium">IV Therapy & Safety</p>
+                                    <p class="text-[10px] text-purple-400 font-semibold">41%</p>
+                                </div>
+                                <div class="w-full h-2 bg-white/5 rounded-full overflow-hidden">
+                                    <div class="h-full bg-gradient-to-r from-purple-600 to-purple-400 rounded-full" style="width: 41%"></div>
+                                </div>
+                                <p class="text-[10px] text-white/30 mt-1">22 of 54 students active</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top Students -->
+                    <div class="glass-card rounded-2xl p-5 animate-fadeIn-delay-3">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-headline text-base font-bold">Top Students</h3>
+                            <a href="admin-students.html" class="text-xs text-primary-container hover:text-primary-fixed transition-colors">View All</a>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3">
+                                <span class="text-[10px] font-headline font-bold text-amber-400 w-4">1</span>
+                                <div class="w-8 h-8 rounded-full silk-gradient flex items-center justify-center text-[10px] font-headline font-bold">PG</div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium truncate">Pedro Garcia</p>
+                                    <p class="text-[10px] text-white/30">3 courses completed</p>
+                                </div>
+                                <span class="text-xs font-headline font-bold text-primary-container">96%</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-[10px] font-headline font-bold text-gray-400 w-4">2</span>
+                                <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-headline font-bold text-primary-container">JD</div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium truncate">Juan Dela Cruz</p>
+                                    <p class="text-[10px] text-white/30">2 courses completed</p>
+                                </div>
+                                <span class="text-xs font-headline font-bold text-primary-container">91%</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-[10px] font-headline font-bold text-amber-700 w-4">3</span>
+                                <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-[10px] font-headline font-bold text-blue-400">MR</div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium truncate">Maria Reyes</p>
+                                    <p class="text-[10px] text-white/30">2 courses completed</p>
+                                </div>
+                                <span class="text-xs font-headline font-bold text-primary-container">88%</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-[10px] font-headline font-bold text-white/30 w-4">4</span>
+                                <div class="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center text-[10px] font-headline font-bold text-amber-400">AS</div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium truncate">Ana Santos</p>
+                                    <p class="text-[10px] text-white/30">1 course completed</p>
+                                </div>
+                                <span class="text-xs font-headline font-bold text-primary-container">85%</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-[10px] font-headline font-bold text-white/30 w-4">5</span>
+                                <div class="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center text-[10px] font-headline font-bold text-purple-400">RC</div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium truncate">Rosa Cruz</p>
+                                    <p class="text-[10px] text-white/30">1 course completed</p>
+                                </div>
+                                <span class="text-xs font-headline font-bold text-primary-container">82%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Students Table -->
+            <div class="glass-card rounded-2xl p-5 animate-fadeIn-delay-3">
+                <div class="flex items-center justify-between mb-5">
+                    <h3 class="font-headline text-base font-bold">Recent Students</h3>
+                    <a href="admin-students.html" class="text-xs text-primary-container hover:text-primary-fixed transition-colors">View All</a>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full min-w-[600px]">
+                        <thead>
+                            <tr class="text-[10px] text-white/30 uppercase tracking-wider font-semibold border-b border-card-border">
+                                <th class="text-left pb-3 pr-4">Student</th>
+                                <th class="text-left pb-3 pr-4 hidden sm:table-cell">Email</th>
+                                <th class="text-left pb-3 pr-4">Progress</th>
+                                <th class="text-left pb-3 pr-4 hidden md:table-cell">Last Active</th>
+                                <th class="text-left pb-3">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-card-border">
+                            <tr class="activity-row">
+                                <td class="py-3 pr-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full silk-gradient flex items-center justify-center text-[10px] font-headline font-bold flex-shrink-0">JD</div>
+                                        <span class="text-sm font-medium">Juan Dela Cruz</span>
+                                    </div>
+                                </td>
+                                <td class="py-3 pr-4 text-xs text-white/40 hidden sm:table-cell">juan@email.com</td>
+                                <td class="py-3 pr-4">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-16 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                            <div class="h-full silk-gradient rounded-full" style="width: 75%"></div>
+                                        </div>
+                                        <span class="text-xs text-white/60">75%</span>
+                                    </div>
+                                </td>
+                                <td class="py-3 pr-4 text-xs text-white/30 hidden md:table-cell">Today</td>
+                                <td class="py-3"><span class="text-[10px] bg-green-500/15 text-green-400 px-2 py-1 rounded-full font-medium">Active</span></td>
+                            </tr>
+                            <tr class="activity-row">
+                                <td class="py-3 pr-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-[10px] font-headline font-bold text-blue-400 flex-shrink-0">MR</div>
+                                        <span class="text-sm font-medium">Maria Reyes</span>
+                                    </div>
+                                </td>
+                                <td class="py-3 pr-4 text-xs text-white/40 hidden sm:table-cell">maria@email.com</td>
+                                <td class="py-3 pr-4">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-16 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                            <div class="h-full bg-gradient-to-r from-blue-600 to-blue-400 rounded-full" style="width: 60%"></div>
+                                        </div>
+                                        <span class="text-xs text-white/60">60%</span>
+                                    </div>
+                                </td>
+                                <td class="py-3 pr-4 text-xs text-white/30 hidden md:table-cell">Yesterday</td>
+                                <td class="py-3"><span class="text-[10px] bg-green-500/15 text-green-400 px-2 py-1 rounded-full font-medium">Active</span></td>
+                            </tr>
+                            <tr class="activity-row">
+                                <td class="py-3 pr-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center text-[10px] font-headline font-bold text-amber-400 flex-shrink-0">AS</div>
+                                        <span class="text-sm font-medium">Ana Santos</span>
+                                    </div>
+                                </td>
+                                <td class="py-3 pr-4 text-xs text-white/40 hidden sm:table-cell">ana@email.com</td>
+                                <td class="py-3 pr-4">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-16 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                            <div class="h-full bg-gradient-to-r from-amber-600 to-amber-400 rounded-full" style="width: 30%"></div>
+                                        </div>
+                                        <span class="text-xs text-white/60">30%</span>
+                                    </div>
+                                </td>
+                                <td class="py-3 pr-4 text-xs text-white/30 hidden md:table-cell">2 days ago</td>
+                                <td class="py-3"><span class="text-[10px] bg-green-500/15 text-green-400 px-2 py-1 rounded-full font-medium">Active</span></td>
+                            </tr>
+                            <tr class="activity-row">
+                                <td class="py-3 pr-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center text-[10px] font-headline font-bold text-red-400 flex-shrink-0">LM</div>
+                                        <span class="text-sm font-medium">Luisa Mendoza</span>
+                                    </div>
+                                </td>
+                                <td class="py-3 pr-4 text-xs text-white/40 hidden sm:table-cell">luisa@email.com</td>
+                                <td class="py-3 pr-4">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-16 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                            <div class="h-full bg-gradient-to-r from-red-600 to-red-400 rounded-full" style="width: 15%"></div>
+                                        </div>
+                                        <span class="text-xs text-white/60">15%</span>
+                                    </div>
+                                </td>
+                                <td class="py-3 pr-4 text-xs text-white/30 hidden md:table-cell">1 week ago</td>
+                                <td class="py-3"><span class="text-[10px] bg-red-500/15 text-red-400 px-2 py-1 rounded-full font-medium">Suspended</span></td>
+                            </tr>
+                            <tr class="activity-row">
+                                <td class="py-3 pr-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center text-[10px] font-headline font-bold text-purple-400 flex-shrink-0">RC</div>
+                                        <span class="text-sm font-medium">Rosa Cruz</span>
+                                    </div>
+                                </td>
+                                <td class="py-3 pr-4 text-xs text-white/40 hidden sm:table-cell">rosa@email.com</td>
+                                <td class="py-3 pr-4">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-16 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                            <div class="h-full bg-gradient-to-r from-purple-600 to-purple-400 rounded-full" style="width: 90%"></div>
+                                        </div>
+                                        <span class="text-xs text-white/60">90%</span>
+                                    </div>
+                                </td>
+                                <td class="py-3 pr-4 text-xs text-white/30 hidden md:table-cell">Today</td>
+                                <td class="py-3"><span class="text-[10px] bg-green-500/15 text-green-400 px-2 py-1 rounded-full font-medium">Active</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ==================== SESSION GUARD ====================
+        function checkSession() {
+            const session = sessionStorage.getItem('pz_admin_session');
+            if (!session) {
+                document.getElementById('sessionExpiredModal').classList.remove('hidden');
+                document.getElementById('sessionExpiredModal').classList.add('flex');
+                return null;
+            }
+            const data = JSON.parse(session);
+            if (Date.now() > data.expiresAt) {
+                sessionStorage.removeItem('pz_admin_session');
+                document.getElementById('sessionExpiredModal').classList.remove('hidden');
+                document.getElementById('sessionExpiredModal').classList.add('flex');
+                return null;
+            }
+            return data;
+        }
+
+        // ==================== POPULATE ADMIN INFO ====================
+        function populateAdminInfo(admin) {
+            const initials = admin.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+            const roleLabel = admin.role.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
+            document.getElementById('adminName').textContent = admin.name;
+            document.getElementById('adminRole').textContent = roleLabel;
+            document.getElementById('adminAvatar').textContent = initials;
+
+            const mobileAvatar = document.getElementById('mobileAvatar');
+            if (mobileAvatar) mobileAvatar.textContent = initials;
+        }
+
+        // ==================== SIDEBAR TOGGLE ====================
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        // ==================== LOGOUT ====================
+        function handleLogout() {
+            sessionStorage.removeItem('pz_admin_session');
+            window.location.href = 'admin-login.html';
+        }
+
+        // ==================== INIT ====================
+        const admin = checkSession();
+        if (admin) {
+            populateAdminInfo(admin);
+        }
+    </script>
+</body>
+</html>
