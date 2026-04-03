@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webinar Access | PZ Academy</title>
+    <meta name="robots" content="noindex, nofollow">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet"/>
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#005539',
+                        'primary-container': '#04704d',
+                        'primary-fixed': '#9cf5c8',
+                        'secondary': '#006d37',
+                        'secondary-container': '#6bfe9c',
+                        'surface': '#f8f9fa',
+                        'surface-container-low': '#f3f4f5',
+                        'surface-container': '#edeeef',
+                        'surface-container-high': '#e7e8e9',
+                        'surface-container-highest': '#e1e3e4',
+                        'surface-container-lowest': '#ffffff',
+                        'surface-variant': '#e1e3e4',
+                        'surface-bright': '#f8f9fa',
+                        'surface-dim': '#d9dadb',
+                        'on-primary': '#ffffff',
+                        'on-primary-container': '#97f0c4',
+                        'on-secondary': '#ffffff',
+                        'on-secondary-container': '#00743a',
+                        'on-surface': '#191c1d',
+                        'on-surface-variant': '#3f4943',
+                        'on-background': '#191c1d',
+                        'background': '#f8f9fa',
+                        'outline': '#6f7a72',
+                        'outline-variant': '#bec9c1',
+                        'error': '#ba1a1a',
+                        'error-container': '#ffdad6',
+                        'on-error': '#ffffff',
+                        'on-error-container': '#93000a',
+                        'tertiary': '#7c3230',
+                        'tertiary-container': '#9a4946',
+                        'inverse-surface': '#2e3132',
+                        'inverse-primary': '#80d8ad',
+                        'inverse-on-surface': '#f0f1f2',
+                        'surface-tint': '#006c4a'
+                    },
+                    fontFamily: {
+                        'headline': ['Public Sans', 'sans-serif'],
+                        'body': ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f3f4f5; }
+        ::-webkit-scrollbar-thumb { background: #bec9c1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6f7a72; }
+        .video-overlay { background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0) 100%); }
+        .quiz-option { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .quiz-option:hover:not(.disabled):not(.answered) { transform: scale(1.02); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); }
+        .quiz-option.correct { animation: correctPulse 0.6s ease-out !important; }
+        .quiz-option.incorrect { animation: incorrectShake 0.5s ease-out !important; }
+        @keyframes correctPulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        @keyframes incorrectShake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
+        .progress-fill { transition: width 0.5s ease-out; }
+        .certificate-glow { box-shadow: 0 0 60px rgba(212, 175, 55, 0.3); }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body antialiased min-h-screen">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-outline-variant/10">
+        <div class="max-w-screen-xl mx-auto px-4 md:px-6 h-14 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span class="text-lg font-black text-primary tracking-tight font-headline">PZ Academy</span>
+                <span class="text-surface-variant">|</span>
+                <div>
+                    <h1 class="text-sm font-bold text-on-surface" id="webinarTitle">Understanding Drug Interactions</h1>
+                    <p class="text-[10px] text-on-surface-variant uppercase tracking-wider">Recorded Webinar</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 text-xs text-on-surface-variant">
+                    <span class="material-symbols-outlined text-sm">person</span>
+                    <span>Dr. Ahmed Khan</span>
+                </div>
+                <button class="flex items-center gap-2 p-1 rounded-full hover:bg-surface-container-low transition-colors ml-2">
+                    <div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-white text-sm font-bold">AK</div>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-screen-xl mx-auto px-4 md:px-6 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Main Video & Quiz Column -->
+            <div class="lg:col-span-2 space-y-6">
+                
+                <!-- Video Player -->
+                <section class="relative aspect-video bg-black rounded-xl overflow-hidden shadow-xl">
+                    <div id="youtubePlayer"></div>
+                    <div id="videoOverlay" class="absolute inset-0 video-overlay flex flex-col items-center justify-center cursor-pointer" onclick="playVideo()">
+                        <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=1280&q=80');"></div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+                        <button class="relative z-10 w-16 h-16 md:w-20 md:h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border-2 border-white/40 hover:bg-white/30 hover:scale-110 transition-all">
+                            <span class="material-symbols-outlined text-4xl md:text-5xl text-white" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+                        </button>
+                        <div class="absolute bottom-4 left-4 right-4 z-10">
+                            <h2 class="text-lg md:text-xl font-bold text-white">Understanding Drug Interactions</h2>
+                            <p class="text-sm text-white/70">Duration: 1h 15m</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Webinar Info -->
+                <section class="bg-surface-container-lowest rounded-xl p-5">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h3 class="text-lg font-bold text-on-surface">About This Webinar</h3>
+                            <p class="text-sm text-on-surface-variant mt-1">A comprehensive overview of drug-drug interactions, mechanisms, and clinical implications.</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="text-center px-4 py-2 bg-surface-container-low rounded-lg">
+                                <p class="text-xs text-on-surface-variant">Duration</p>
+                                <p class="font-bold text-primary">1h 15m</p>
+                            </div>
+                            <div class="text-center px-4 py-2 bg-surface-container-low rounded-lg">
+                                <p class="text-xs text-on-surface-variant">Views</p>
+                                <p class="font-bold text-primary">1.2k</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Quiz Section -->
+                <section class="bg-gradient-to-br from-primary to-primary-container rounded-2xl p-6 text-white relative overflow-hidden">
+                    <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+                    <div class="relative z-10">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="bg-white/20 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">Knowledge Check</span>
+                                <h3 class="text-xl font-extrabold mt-2">Webinar Quiz</h3>
+                                <p class="text-on-primary-container/80 text-sm mt-1">Score 70% to earn your certificate</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="bg-white/10 backdrop-blur-sm px-5 py-3 rounded-xl border border-white/20">
+                                    <p class="text-[10px] uppercase tracking-widest text-primary-fixed mb-1">Best</p>
+                                    <span id="bestScore" class="text-3xl font-black">--</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-5 flex items-center gap-4">
+                            <button onclick="startQuiz()" id="startQuizBtn" class="flex-1 md:flex-none bg-white text-primary px-6 py-3 rounded-lg font-bold text-sm hover:bg-primary-fixed transition-all shadow-lg">
+                                Take Quiz
+                            </button>
+                            <p id="attemptsText" class="text-sm text-primary-fixed/80">3 attempts left</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Certificate (Hidden by default) -->
+                <section id="certificateSection" class="hidden bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/10">
+                    <div class="flex items-center gap-5">
+                        <div class="w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl flex items-center justify-center shadow-lg certificate-glow">
+                            <span class="material-symbols-outlined text-4xl text-white" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-lg font-bold text-on-surface">Certificate Earned!</h3>
+                            <p class="text-sm text-on-surface-variant">You've completed this webinar and passed the quiz.</p>
+                        </div>
+                        <button onclick="downloadCertificate()" class="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg font-bold text-sm shadow-lg hover:shadow-xl transition-all flex items-center gap-2">
+                            <span class="material-symbols-outlined">download</span>
+                            Download
+                        </button>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                
+                <!-- Presenter Card -->
+                <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/10 p-5">
+                    <h3 class="text-sm font-bold text-on-surface mb-4">Presenter</h3>
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-primary to-primary-container rounded-full flex items-center justify-center text-white font-bold">AK</div>
+                        <div>
+                            <p class="font-bold text-on-surface">Dr. Ahmed Khan</p>
+                            <p class="text-xs text-on-surface-variant">PharmD, Clinical Pharmacologist</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress -->
+                <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/10 p-5">
+                    <h3 class="text-sm font-bold text-on-surface mb-4">Your Progress</h3>
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-12 h-12 bg-surface-container-low rounded-lg flex items-center justify-center">
+                            <span class="material-symbols-outlined text-primary">play_circle</span>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-on-surface-variant">Completion</span>
+                                <span id="completionPercent" class="font-bold text-primary">0%</span>
+                            </div>
+                            <div class="h-2 bg-surface-variant rounded-full overflow-hidden">
+                                <div id="completionBar" class="h-full bg-primary rounded-full progress-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="text-center p-2 bg-surface-container-low rounded-lg">
+                            <span id="videoStatus" class="material-symbols-outlined text-lg text-on-surface-variant">radio_button_unchecked</span>
+                            <p class="text-[10px] text-on-surface-variant mt-1">Video</p>
+                        </div>
+                        <div class="text-center p-2 bg-surface-container-low rounded-lg">
+                            <span id="quizStatus" class="material-symbols-outlined text-lg text-on-surface-variant">radio_button_unchecked</span>
+                            <p class="text-[10px] text-on-surface-variant mt-1">Quiz</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resources -->
+                <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/10 p-5">
+                    <h3 class="text-sm font-bold text-on-surface mb-4">Resources</h3>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg hover:bg-surface-container transition-colors cursor-pointer">
+                            <span class="material-symbols-outlined text-primary text-xl">picture_as_pdf</span>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-on-surface">Presentation Slides</p>
+                                <p class="text-[10px] text-on-surface-variant">PDF • 3.2 MB</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg hover:bg-surface-container transition-colors cursor-pointer">
+                            <span class="material-symbols-outlined text-secondary text-xl">table_chart</span>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-on-surface">Drug Interaction Chart</p>
+                                <p class="text-[10px] text-on-surface-variant">PDF • 1.5 MB</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Share -->
+                <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/10 p-5">
+                    <h3 class="text-sm font-bold text-on-surface mb-4">Share Webinar</h3>
+                    <div class="flex gap-2">
+                        <button class="flex-1 py-2 bg-surface-container text-on-surface rounded-lg hover:bg-surface-variant transition-colors text-sm font-medium">
+                            Copy Link
+                        </button>
+                        <button class="flex-1 py-2 bg-[#25D366] text-white rounded-lg hover:bg-[#20bd5a] transition-colors text-sm font-medium flex items-center justify-center gap-1">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                        </button>
+                        <button class="flex-1 py-2 bg-[#1DA1F2] text-white rounded-lg hover:bg-[#1a91da] transition-colors text-sm font-medium flex items-center justify-center gap-1">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Quiz Modal -->
+    <div id="quizModal" class="fixed inset-0 z-[100] hidden">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeQuiz()"></div>
+        <div class="absolute inset-4 md:inset-8 lg:inset-y-10 lg:inset-x-20 bg-surface-container-lowest rounded-2xl overflow-hidden flex flex-col max-w-2xl mx-auto">
+            <div class="flex items-center justify-between p-4 border-b border-outline-variant/10">
+                <div class="flex items-center gap-3">
+                    <button onclick="closeQuiz()" class="p-2 rounded-lg hover:bg-surface-container transition-colors">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                    <div>
+                        <h3 class="font-bold text-on-surface">Webinar Quiz</h3>
+                        <p class="text-xs text-on-surface-variant">Question <span id="qNum">1</span> of <span id="totalQ">5</span></p>
+                    </div>
+                </div>
+                <div id="scoreBox" class="px-4 py-2 bg-primary/10 rounded-lg">
+                    <span class="text-sm font-bold text-primary"><span id="scoreDisplay">0</span>%</span>
+                </div>
+            </div>
+            <div class="flex-1 overflow-y-auto p-6">
+                <div id="quizContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentQ = 0;
+        let score = 0;
+        let videoWatched = false;
+        
+        const questions = [
+            {
+                q: "What is a drug-drug interaction?",
+                options: ["When two drugs have no effect", "When one drug affects another drug's action", "When drugs are taken at the same time", "When drugs are metabolized similarly"],
+                correct: 1
+            },
+            {
+                q: "Which type of interaction occurs in the GI tract?",
+                options: ["Pharmacokinetic", "Pharmaceutical", "Pharmacodynamic", "Synergistic"],
+                correct: 1
+            },
+            {
+                q: "Grapefruit juice inhibits which enzyme?",
+                options: ["CYP1A2", "CYP2C9", "CYP3A4", "CYP2D6"],
+                correct: 2
+            },
+            {
+                q: "What is an example of a pharmacodynamic interaction?",
+                options: ["Chelation of drugs in the gut", "Competition for protein binding", "Additive effect of two CNS depressants", "Alteration of gastric pH"],
+                correct: 2
+            },
+            {
+                q: "Warfarin interacts with which vitamin?",
+                options: ["Vitamin A", "Vitamin B12", "Vitamin C", "Vitamin K"],
+                correct: 3
+            }
+        ];
+
+        function playVideo() {
+            document.getElementById('videoOverlay').classList.add('hidden');
+            videoWatched = true;
+            document.getElementById('videoStatus').textContent = 'check_circle';
+            document.getElementById('videoStatus').classList.remove('text-on-surface-variant');
+            document.getElementById('videoStatus').classList.add('text-secondary');
+            updateProgress();
+        }
+
+        function startQuiz() {
+            document.getElementById('quizModal').classList.remove('hidden');
+            currentQ = 0;
+            score = 0;
+            renderQuestion();
+        }
+
+        function closeQuiz() {
+            document.getElementById('quizModal').classList.add('hidden');
+        }
+
+        function renderQuestion() {
+            const q = questions[currentQ];
+            document.getElementById('qNum').textContent = currentQ + 1;
+            document.getElementById('totalQ').textContent = questions.length;
+            document.getElementById('scoreDisplay').textContent = score;
+            
+            document.getElementById('quizContent').innerHTML = `
+                <h4 class="text-lg font-bold text-on-surface mb-6">${q.q}</h4>
+                <div class="space-y-3">
+                    ${q.options.map((opt, i) => `
+                        <div class="quiz-option bg-surface-container rounded-xl p-4 cursor-pointer border-2 border-transparent hover:border-primary/30" onclick="selectAnswer(${i})">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center text-sm font-bold text-on-surface-variant">${String.fromCharCode(65 + i)}</div>
+                                <span class="text-on-surface">${opt}</span>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function selectAnswer(idx) {
+            const options = document.querySelectorAll('.quiz-option');
+            options.forEach(o => o.classList.add('disabled', 'pointer-events-none'));
+            
+            if (idx === questions[currentQ].correct) {
+                options[idx].classList.add('correct', 'border-green-500', 'bg-green-50');
+                score += 20;
+                document.getElementById('scoreDisplay').textContent = score;
+            } else {
+                options[idx].classList.add('incorrect', 'border-red-500', 'bg-red-50');
+                options[questions[currentQ].correct].classList.add('correct', 'border-green-500', 'bg-green-50');
+            }
+            
+            setTimeout(() => {
+                currentQ++;
+                if (currentQ < questions.length) {
+                    renderQuestion();
+                } else {
+                    showResults();
+                }
+            }, 1200);
+        }
+
+        function showResults() {
+            const passed = score >= 70;
+            document.getElementById('quizContent').innerHTML = `
+                <div class="text-center py-8">
+                    <div class="w-20 h-20 mx-auto mb-5 rounded-full ${passed ? 'bg-secondary-container' : 'bg-error-container'} flex items-center justify-center">
+                        <span class="material-symbols-outlined text-4xl ${passed ? 'text-secondary' : 'text-error'}" style="font-variation-settings: 'FILL' 1;">${passed ? 'check_circle' : 'cancel'}</span>
+                    </div>
+                    <h4 class="text-xl font-bold text-on-surface">${passed ? 'Congratulations!' : 'Try Again'}</h4>
+                    <p class="text-on-surface-variant mt-2">You scored <span class="font-bold text-primary">${score}%</span></p>
+                    <button onclick="${passed ? 'closeQuiz(); showCertificate();' : 'closeQuiz();'}" class="mt-6 px-8 py-3 ${passed ? 'bg-secondary text-white' : 'bg-surface-container text-on-surface'} font-bold rounded-xl">
+                        ${passed ? 'Get Certificate' : 'Close'}
+                    </button>
+                </div>
+            `;
+            
+            if (passed) {
+                document.getElementById('bestScore').textContent = score + '%';
+                document.getElementById('quizStatus').textContent = 'check_circle';
+                document.getElementById('quizStatus').classList.remove('text-on-surface-variant');
+                document.getElementById('quizStatus').classList.add('text-secondary');
+                updateProgress();
+            }
+        }
+
+        function showCertificate() {
+            document.getElementById('certificateSection').classList.remove('hidden');
+        }
+
+        function downloadCertificate() {
+            alert('Certificate download started!');
+        }
+
+        function updateProgress() {
+            let progress = 0;
+            if (videoWatched) progress += 50;
+            if (score >= 70) progress += 50;
+            
+            document.getElementById('completionPercent').textContent = progress + '%';
+            document.getElementById('completionBar').style.width = progress + '%';
+        }
+    </script>
+</body>
+</html>
