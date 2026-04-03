@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Student Management | PZ Academy</title>
+<meta name="robots" content="noindex, nofollow">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800;900&amp;family=Inter:wght@300;400;500;600&amp;family=Montserrat:wght@700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface": "#f8f9fa", "primary": "#005539", "primary-container": "#04704d",
+                      "on-surface": "#191c1d", "on-surface-variant": "#3f4943", "outline-variant": "#bec9c1",
+                      "surface-container-lowest": "#ffffff", "surface-container": "#edeeef",
+                      "surface-container-low": "#f3f4f5", "surface-container-high": "#e7e8e9",
+                      "surface-container-highest": "#e1e3e4",
+                      "secondary": "#006d37", "secondary-container": "#6bfe9c", "on-secondary-container": "#00743a",
+                      "error": "#ba1a1a", "tertiary": "#7c3230", "tertiary-container": "#9a4946",
+                      "outline": "#6f7a72"
+              },
+              "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+              "fontFamily": { "headline": ["Montserrat"], "body": ["Inter"], "label": ["Inter"], "display": ["Public Sans"] }
+            },
+          },
+        }
+      </script>
+<style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+        .clinical-shadow { box-shadow: 0 1px 3px rgba(25, 28, 29, 0.04); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(100%); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fadeIn { animation: fadeIn 0.3s ease-out forwards; }
+        .animate-scaleIn { animation: scaleIn 0.2s ease-out forwards; }
+        .animate-slideUp { animation: slideUp 0.3s ease-out forwards; }
+        .sidebar-link { transition: all 0.2s ease; }
+        .sidebar-link:hover { background: rgba(255,255,255,0.1); }
+        .sidebar-link.active { background: rgba(255,255,255,0.15); }
+        .sidebar-gradient { background: linear-gradient(180deg, #04704D 0%, #002114 100%); }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f8f9fa; }
+        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 3px; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .student-card { transition: all 0.15s ease; }
+        .student-card:hover { background: rgba(0, 85, 57, 0.02); }
+        .detail-panel { transition: transform 0.3s ease; }
+        .detail-panel.open { transform: translateX(0); }
+        .detail-panel.closed { transform: translateX(100%); }
+        .bottom-sheet { transition: transform 0.3s ease; }
+        .bottom-sheet.open { transform: translateY(0); }
+        .bottom-sheet.closed { transform: translateY(100%); }
+        @media (max-width: 768px) { .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 40; } }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased flex h-screen overflow-hidden">
+
+    <div id="sessionExpiredModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-on-surface/40 backdrop-blur-sm"></div>
+        <div class="relative bg-white w-full max-w-sm rounded-xl p-8 text-center animate-scaleIn shadow-2xl">
+            <div class="w-16 h-16 mx-auto rounded-full bg-error/10 flex items-center justify-center mb-4">
+                <span class="material-symbols-outlined text-3xl text-error">lock_clock</span>
+            </div>
+            <h2 class="font-display font-black text-xl text-on-surface mb-2">Session Expired</h2>
+            <p class="text-on-surface-variant text-sm mb-6">Your session has timed out. Please log in again.</p>
+            <a href="admin-login.html" class="inline-block bg-gradient-to-r from-primary to-primary-container px-8 py-3 rounded-lg text-white font-display font-bold text-sm tracking-wider uppercase shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all">Return to Login</a>
+        </div>
+    </div>
+
+    <div id="sidebarOverlay" class="sidebar-overlay hidden md:hidden" onclick="toggleSidebar()"></div>
+
+    <aside id="sidebar" class="fixed left-0 top-0 h-full w-64 sidebar-gradient flex flex-col py-6 z-50 shadow-xl transform -translate-x-full md:translate-x-0 transition-transform duration-300">
+        <div class="px-6 mb-10">
+            <h1 class="text-xl font-bold tracking-tighter text-white font-headline">PZ Academy</h1>
+            <p class="text-[10px] text-white/60 font-label tracking-widest uppercase mt-1">Clinical Admin Portal</p>
+        </div>
+        <nav class="flex-1 px-3 space-y-1">
+            <a href="admin-dashboard.html" class="sidebar-link flex items-center px-3 py-2.5 rounded-lg text-white/70 hover:text-white">
+                <span class="material-symbols-outlined mr-3 text-sm">dashboard</span>
+                <span class="font-display font-medium text-sm tracking-tight">Dashboard</span>
+            </a>
+            <a href="admin-students.html" class="sidebar-link active flex items-center px-3 py-2.5 rounded-lg text-white">
+                <span class="material-symbols-outlined mr-3 text-sm" style="font-variation-settings: 'FILL' 1;">group</span>
+                <span class="font-display font-semibold text-sm tracking-tight">Students</span>
+            </a>
+            <a href="admin-course-manager.html" class="sidebar-link flex items-center px-3 py-2.5 rounded-lg text-white/70 hover:text-white">
+                <span class="material-symbols-outlined mr-3 text-sm">school</span>
+                <span class="font-display font-medium text-sm tracking-tight">Courses</span>
+            </a>
+            <a href="admin-quiz-builder.html" class="sidebar-link flex items-center px-3 py-2.5 rounded-lg text-white/70 hover:text-white">
+                <span class="material-symbols-outlined mr-3 text-sm">quiz</span>
+                <span class="font-display font-medium text-sm tracking-tight">Quiz Builder</span>
+            </a>
+            <a href="#" class="sidebar-link flex items-center px-3 py-2.5 rounded-lg text-white/70 hover:text-white">
+                <span class="material-symbols-outlined mr-3 text-sm">workspace_premium</span>
+                <span class="font-display font-medium text-sm tracking-tight">Certificates</span>
+            </a>
+            <a href="#" class="sidebar-link flex items-center px-3 py-2.5 rounded-lg text-white/70 hover:text-white">
+                <span class="material-symbols-outlined mr-3 text-sm">settings</span>
+                <span class="font-display font-medium text-sm tracking-tight">Settings</span>
+            </a>
+        </nav>
+        <div class="px-6 mt-auto">
+            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 flex items-center gap-3">
+                <div id="sidebarAvatar" class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-xs font-display font-bold text-white ring-2 ring-white/20 flex-shrink-0">SA</div>
+                <div class="overflow-hidden flex-1 min-w-0">
+                    <p id="sidebarName" class="text-white text-xs font-bold truncate">Super Administrator</p>
+                    <p id="sidebarRole" class="text-white/60 text-[10px] truncate">Super Admin</p>
+                </div>
+                <button onclick="showLogoutModal()" class="text-white/60 hover:text-white transition-opacity flex-shrink-0">
+                    <span class="material-symbols-outlined text-sm">logout</span>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col relative overflow-hidden md:ml-64">
+        <header class="fixed top-0 left-0 md:left-64 right-0 z-40 bg-white/70 backdrop-blur-md flex items-center justify-between px-4 md:px-8 h-16 border-b border-outline-variant/10">
+            <div class="flex items-center gap-4 flex-1">
+                <button onclick="toggleSidebar()" class="md:hidden p-2 rounded-lg text-on-surface-variant hover:bg-on-surface/5 transition-colors">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+                <h2 class="font-headline text-lg font-bold text-on-surface hidden sm:block">Student Management</h2>
+                <h2 class="font-headline text-base font-bold text-on-surface sm:hidden">Students</h2>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="exportStudents()" class="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg border border-outline-variant/30 text-primary font-semibold text-sm hover:bg-emerald-50 transition-colors">
+                    <span class="material-symbols-outlined text-lg">ios_share</span>
+                    Export Data
+                </button>
+                <div id="topAvatar" class="hidden md:flex h-8 w-8 rounded-full bg-gradient-to-br from-primary to-primary-container items-center justify-center text-white text-[10px] font-display font-bold">SA</div>
+            </div>
+        </header>
+
+        <main class="mt-16 flex-1 overflow-y-auto bg-surface">
+            <!-- Stats Row -->
+            <div class="p-4 md:p-8">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
+                    <div class="bg-surface-container-lowest rounded-xl clinical-shadow border border-outline-variant/10 p-4 md:p-5 flex items-center justify-between animate-fadeIn">
+                        <div>
+                            <p class="text-[0.65rem] uppercase tracking-wider font-bold text-on-surface-variant mb-1">Total Students</p>
+                            <h3 class="text-xl md:text-2xl font-display font-black text-primary">247</h3>
+                        </div>
+                        <div class="w-10 h-10 bg-primary/5 rounded-full flex items-center justify-center text-primary">
+                            <span class="material-symbols-outlined">groups</span>
+                        </div>
+                    </div>
+                    <div class="bg-surface-container-lowest rounded-xl clinical-shadow border border-outline-variant/10 p-4 md:p-5 flex items-center justify-between animate-fadeIn">
+                        <div>
+                            <p class="text-[0.65rem] uppercase tracking-wider font-bold text-on-surface-variant mb-1">Active</p>
+                            <h3 class="text-xl md:text-2xl font-display font-black text-secondary">231</h3>
+                        </div>
+                        <div class="w-10 h-10 bg-secondary/5 rounded-full flex items-center justify-center text-secondary">
+                            <span class="material-symbols-outlined">check_circle</span>
+                        </div>
+                    </div>
+                    <div class="bg-surface-container-lowest rounded-xl clinical-shadow border border-outline-variant/10 p-4 md:p-5 flex items-center justify-between animate-fadeIn">
+                        <div>
+                            <p class="text-[0.65rem] uppercase tracking-wider font-bold text-on-surface-variant mb-1">Suspended</p>
+                            <h3 class="text-xl md:text-2xl font-display font-black text-error">16</h3>
+                        </div>
+                        <div class="w-10 h-10 bg-error/5 rounded-full flex items-center justify-center text-error">
+                            <span class="material-symbols-outlined">block</span>
+                        </div>
+                    </div>
+                    <div class="bg-surface-container-lowest rounded-xl clinical-shadow border border-outline-variant/10 p-4 md:p-5 flex items-center justify-between animate-fadeIn">
+                        <div>
+                            <p class="text-[0.65rem] uppercase tracking-wider font-bold text-on-surface-variant mb-1">Certificates</p>
+                            <h3 class="text-xl md:text-2xl font-display font-black text-tertiary">38</h3>
+                        </div>
+                        <div class="w-10 h-10 bg-tertiary/5 rounded-full flex items-center justify-center text-tertiary">
+                            <span class="material-symbols-outlined">workspace_premium</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter Bar -->
+                <div class="flex flex-wrap items-center gap-3 md:gap-4 mb-6">
+                    <div class="relative flex-1 min-w-[200px]">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">search</span>
+                        <input type="text" id="searchInput" oninput="filterStudents()" placeholder="Search by name, email or ID..." class="w-full pl-10 pr-4 py-2.5 bg-surface-container-lowest border-0 ring-1 ring-outline-variant/20 rounded-lg focus:ring-2 focus:ring-primary text-sm text-on-surface placeholder:text-on-surface-variant/50"/>
+                    </div>
+                    <div class="hidden md:flex bg-surface-container-low p-1 rounded-lg">
+                        <button onclick="setFilter('all')" id="filter-all" class="filter-btn active px-5 py-1.5 bg-white text-primary font-bold text-xs rounded-md shadow-sm">All</button>
+                        <button onclick="setFilter('active')" id="filter-active" class="filter-btn px-5 py-1.5 text-on-surface-variant font-medium text-xs hover:text-primary transition-colors">Active</button>
+                        <button onclick="setFilter('suspended')" id="filter-suspended" class="filter-btn px-5 py-1.5 text-on-surface-variant font-medium text-xs hover:text-primary transition-colors">Suspended</button>
+                    </div>
+                    <div class="flex md:hidden gap-2 overflow-x-auto no-scrollbar">
+                        <button onclick="setFilter('all')" id="filter-all-m" class="filter-btn-m active px-4 py-2 rounded-full bg-primary text-white text-xs font-bold">All</button>
+                        <button onclick="setFilter('active')" id="filter-active-m" class="filter-btn-m px-4 py-2 rounded-full bg-surface-container text-on-surface-variant text-xs font-semibold">Active</button>
+                        <button onclick="setFilter('suspended')" id="filter-suspended-m" class="filter-btn-m px-4 py-2 rounded-full bg-surface-container text-on-surface-variant text-xs font-semibold">Suspended</button>
+                    </div>
+                    <div class="relative">
+                        <select id="courseFilter" onchange="filterStudents()" class="appearance-none bg-surface-container-lowest border-0 ring-1 ring-outline-variant/20 pl-4 pr-10 py-2.5 rounded-lg text-sm font-medium focus:ring-2 focus:ring-primary text-on-surface">
+                            <option value="">All Courses</option>
+                            <option value="safe-prescribing">Safe Prescribing</option>
+                            <option value="clinical-therapeutics">Clinical Therapeutics</option>
+                            <option value="special-populations">Special Populations</option>
+                            <option value="iv-therapy">IV Therapy &amp; Safety</option>
+                        </select>
+                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-sm">expand_more</span>
+                    </div>
+                </div>
+
+                <!-- Desktop: Table + Detail Panel -->
+                <div class="hidden lg:grid lg:grid-cols-12 gap-8 items-start">
+                    <!-- Table -->
+                    <div class="lg:col-span-8 bg-surface-container-lowest rounded-xl clinical-shadow border border-outline-variant/10 overflow-hidden">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-surface-container-low border-b border-outline-variant/10">
+                                    <th class="px-6 py-4 text-[0.65rem] font-bold uppercase tracking-widest text-on-surface-variant">Student</th>
+                                    <th class="px-6 py-4 text-[0.65rem] font-bold uppercase tracking-widest text-on-surface-variant">Enrolled</th>
+                                    <th class="px-6 py-4 text-[0.65rem] font-bold uppercase tracking-widest text-on-surface-variant">Progress</th>
+                                    <th class="px-6 py-4 text-[0.65rem] font-bold uppercase tracking-widest text-on-surface-variant">Quizzes</th>
+                                    <th class="px-6 py-4 text-[0.65rem] font-bold uppercase tracking-widest text-on-surface-variant">Status</th>
+                                    <th class="px-6 py-4 text-[0.65rem] font-bold uppercase tracking-widest text-on-surface-variant text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentsTableBody" class="divide-y divide-outline-variant/5"></tbody>
+                        </table>
+                        <div class="px-6 py-4 bg-surface-container-low/50 flex items-center justify-between">
+                            <p class="text-xs text-on-surface-variant">Showing <span id="showingCount">1-10</span> of <span id="totalCount">0</span> students</p>
+                            <div class="flex items-center gap-2">
+                                <button onclick="changePage(-1)" id="prevPage" class="p-1 rounded hover:bg-surface-container-highest text-on-surface-variant disabled:opacity-30 disabled:cursor-not-allowed">
+                                    <span class="material-symbols-outlined text-base">chevron_left</span>
+                                </button>
+                                <div id="pageNumbers" class="flex items-center gap-1"></div>
+                                <button onclick="changePage(1)" id="nextPage" class="p-1 rounded hover:bg-surface-container-highest text-on-surface-variant disabled:opacity-30 disabled:cursor-not-allowed">
+                                    <span class="material-symbols-outlined text-base">chevron_right</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detail Panel (Desktop) -->
+                    <div id="detailPanelDesktop" class="lg:col-span-4 bg-surface-container-lowest rounded-xl clinical-shadow border border-outline-variant/10 overflow-hidden sticky top-24">
+                        <div id="detailPanelContent">
+                            <div class="p-8 text-center text-on-surface-variant">
+                                <span class="material-symbols-outlined text-4xl text-outline-variant mb-3">person</span>
+                                <p class="text-sm">Click on a student to view their profile</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mobile: Student Cards -->
+                <div class="lg:hidden space-y-3" id="mobileStudentList"></div>
+
+                <!-- Mobile Pagination -->
+                <div class="lg:hidden flex items-center justify-between px-2 py-4 mt-4">
+                    <p class="text-xs text-on-surface-variant"><span id="showingCountMobile">1-10</span> of <span id="totalCountMobile">0</span></p>
+                    <div class="flex items-center gap-2">
+                        <button onclick="changePage(-1)" id="prevPageMobile" class="px-3 py-1.5 rounded-lg bg-surface-container border border-outline-variant/15 text-xs text-on-surface-variant disabled:opacity-30 disabled:cursor-not-allowed">Previous</button>
+                        <button onclick="changePage(1)" id="nextPageMobile" class="px-3 py-1.5 rounded-lg bg-surface-container border border-outline-variant/15 text-xs text-on-surface-variant disabled:opacity-30 disabled:cursor-not-allowed">Next</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Detail Bottom Sheet (Mobile) -->
+    <div id="detailOverlay" class="fixed inset-0 z-40 hidden bg-on-surface/40" onclick="closeDetailSheet()"></div>
+    <div id="detailSheet" class="detail-panel closed fixed bottom-0 left-0 right-0 z-50 bg-surface-container-lowest rounded-t-3xl shadow-2xl max-h-[85vh] overflow-y-auto md:hidden">
+        <div class="sticky top-0 bg-surface-container-lowest z-10">
+            <div class="w-12 h-1.5 bg-surface-container-highest rounded-full mx-auto mt-3 mb-4"></div>
+            <div id="detailSheetContent"></div>
+        </div>
+    </div>
+
+    <!-- Suspend Modal -->
+    <div id="suspendModal" class="fixed inset-0 z-[60] hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-on-surface/40 backdrop-blur-sm" onclick="closeSuspendModal()"></div>
+        <div class="relative bg-white w-full max-w-sm rounded-xl p-6 animate-scaleIn shadow-2xl">
+            <div class="text-center mb-6">
+                <div id="suspendIcon" class="w-16 h-16 mx-auto rounded-full bg-error/10 flex items-center justify-center mb-4">
+                    <span class="material-symbols-outlined text-3xl text-error">block</span>
+                </div>
+                <h3 class="font-headline text-lg font-bold text-on-surface mb-2" id="suspendTitle">Suspend Student?</h3>
+                <p class="text-on-surface-variant text-sm" id="suspendText">This will temporarily revoke their access to all courses.</p>
+            </div>
+            <div class="mb-4">
+                <label class="block text-[10px] font-label font-bold text-on-surface-variant tracking-wider uppercase mb-2">Reason (optional)</label>
+                <textarea id="suspendReason" rows="2" placeholder="Add a note..." class="w-full bg-surface-container-lowest border border-outline-variant/15 rounded-lg px-4 py-3 text-on-surface text-sm placeholder:text-on-surface-variant/40 focus:ring-2 focus:ring-primary/10 outline-none transition-colors resize-none"></textarea>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="closeSuspendModal()" class="flex-1 px-4 py-3 rounded-lg border border-outline-variant text-on-surface text-sm font-semibold hover:bg-surface-container transition-colors">Cancel</button>
+                <button onclick="confirmSuspend()" id="confirmSuspendBtn" class="flex-1 px-4 py-3 rounded-lg bg-error text-white text-sm font-semibold hover:bg-error/90 transition-colors">Suspend</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout Modal -->
+    <div id="logoutModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-on-surface/40 backdrop-blur-sm" onclick="closeLogoutModal()"></div>
+        <div class="relative bg-white w-full max-w-sm rounded-xl p-6 animate-scaleIn shadow-2xl">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-4"><span class="material-symbols-outlined text-3xl text-primary">logout</span></div>
+                <h3 class="font-display font-black text-xl text-on-surface mb-2">Sign Out?</h3>
+                <p class="text-on-surface-variant text-sm">Are you sure you want to sign out of your admin session?</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="closeLogoutModal()" class="flex-1 px-4 py-3 rounded-lg border border-outline-variant text-on-surface text-sm font-semibold hover:bg-surface-container transition-colors">Cancel</button>
+                <button onclick="confirmLogout()" class="flex-1 px-4 py-3 rounded-lg bg-error text-white text-sm font-semibold hover:bg-error/90 transition-colors">Sign Out</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-20 md:bottom-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-6 py-3 rounded-xl shadow-2xl opacity-0 pointer-events-none transition-all duration-300 z-[70] flex items-center gap-3">
+        <span id="toastIcon" class="material-symbols-outlined text-lg text-emerald-400">check_circle</span>
+        <span id="toastMessage" class="text-sm font-medium"></span>
+    </div>
+
+    <script>
+        const students = [
+            { id: 1, name: 'Dr. Elena Ross', email: 'elena.ross@academy.com', enrolled: 'Oct 12, 2023', progress: 85, quizzesPassed: 14, quizzesTotal: 15, lastActive: '2 hours ago', status: 'active', courses: ['safe-prescribing', 'clinical-therapeutics'], certificates: 2 },
+            { id: 2, name: 'James Wilson', email: 'j.wilson@medix.org', enrolled: 'Nov 04, 2023', progress: 42, quizzesPassed: 6, quizzesTotal: 15, lastActive: '1 day ago', status: 'active', courses: ['safe-prescribing'], certificates: 0 },
+            { id: 3, name: 'Sarah Mitchell', email: 'mitchell.s@healthnet.com', enrolled: 'Sep 28, 2023', progress: 12, quizzesPassed: 2, quizzesTotal: 15, lastActive: '3 days ago', status: 'suspended', courses: ['special-populations'], certificates: 0 },
+            { id: 4, name: 'Marcus Chen', email: 'm.chen@hospital.gov', enrolled: 'Oct 30, 2023', progress: 98, quizzesPassed: 15, quizzesTotal: 15, lastActive: 'Today', status: 'active', courses: ['safe-prescribing', 'clinical-therapeutics', 'special-populations'], certificates: 3 },
+            { id: 5, name: 'Dr. Ana Santos', email: 'ana.santos@clinic.edu', enrolled: 'Dec 15, 2023', progress: 67, quizzesPassed: 8, quizzesTotal: 12, lastActive: '5 hours ago', status: 'active', courses: ['clinical-therapeutics'], certificates: 1 },
+            { id: 6, name: 'Robert Kim', email: 'r.kim@medcenter.org', enrolled: 'Jan 08, 2024', progress: 34, quizzesPassed: 3, quizzesTotal: 12, lastActive: '1 week ago', status: 'active', courses: ['iv-therapy'], certificates: 0 },
+            { id: 7, name: 'Lisa Park', email: 'l.park@healthsys.com', enrolled: 'Nov 22, 2023', progress: 91, quizzesPassed: 11, quizzesTotal: 12, lastActive: 'Today', status: 'active', courses: ['safe-prescribing', 'clinical-therapeutics'], certificates: 2 },
+            { id: 8, name: 'David Torres', email: 'd.torres@medical.inst', enrolled: 'Feb 01, 2024', progress: 8, quizzesPassed: 0, quizzesTotal: 12, lastActive: '2 weeks ago', status: 'suspended', courses: ['iv-therapy'], certificates: 0 },
+            { id: 9, name: 'Dr. Maya Patel', email: 'm.patel@academy.com', enrolled: 'Oct 05, 2023', progress: 76, quizzesPassed: 9, quizzesTotal: 12, lastActive: 'Yesterday', status: 'active', courses: ['special-populations', 'clinical-therapeutics'], certificates: 1 },
+            { id: 10, name: 'Chris Anderson', email: 'c.anderson@hospital.gov', enrolled: 'Dec 28, 2023', progress: 55, quizzesPassed: 5, quizzesTotal: 12, lastActive: '4 days ago', status: 'active', courses: ['safe-prescribing'], certificates: 0 },
+            { id: 11, name: 'Dr. Nina Gupta', email: 'n.gupta@clinic.edu', enrolled: 'Jan 15, 2024', progress: 88, quizzesPassed: 10, quizzesTotal: 12, lastActive: 'Today', status: 'active', courses: ['clinical-therapeutics', 'special-populations'], certificates: 2 },
+            { id: 12, name: 'Tom Bradley', email: 't.bradley@medix.org', enrolled: 'Nov 10, 2023', progress: 23, quizzesPassed: 1, quizzesTotal: 12, lastActive: '1 week ago', status: 'suspended', courses: ['iv-therapy'], certificates: 0 }
+        ];
+
+        const avatarBgColors = ['bg-primary/10 text-primary', 'bg-blue-500/10 text-blue-600', 'bg-amber-500/10 text-amber-600', 'bg-purple-500/10 text-purple-600', 'bg-red-500/10 text-red-600', 'bg-teal-500/10 text-teal-600'];
+        const courseIcons = { 'safe-prescribing': 'medication', 'clinical-therapeutics': 'biotech', 'special-populations': 'child_care', 'iv-therapy': 'water_drop' };
+        const courseNames = { 'safe-prescribing': 'Safe Prescribing', 'clinical-therapeutics': 'Clinical Therapeutics', 'special-populations': 'Special Populations', 'iv-therapy': 'IV Therapy & Safety' };
+
+        let filteredStudents = [...students];
+        let currentPage = 1;
+        const perPage = 10;
+        let currentFilter = 'all';
+        let selectedStudentId = null;
+        let suspendTargetId = null;
+        let isSuspending = true;
+
+        function checkSession() {
+            const session = sessionStorage.getItem('pz_admin_session');
+            if (!session) { showSessionExpired(); return null; }
+            const data = JSON.parse(session);
+            if (Date.now() > data.expiresAt) { sessionStorage.removeItem('pz_admin_session'); showSessionExpired(); return null; }
+            return data;
+        }
+        function showSessionExpired() { document.getElementById('sessionExpiredModal').classList.remove('hidden'); document.getElementById('sessionExpiredModal').classList.add('flex'); }
+        function populateAdminInfo(admin) {
+            const initials = admin.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+            const topAvatar = document.getElementById('topAvatar');
+            if (topAvatar) topAvatar.textContent = initials;
+            const sidebarAvatar = document.getElementById('sidebarAvatar');
+            if (sidebarAvatar) sidebarAvatar.textContent = initials;
+        }
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('-translate-x-full'); document.getElementById('sidebarOverlay').classList.toggle('hidden'); }
+        function showLogoutModal() { document.getElementById('logoutModal').classList.remove('hidden'); document.getElementById('logoutModal').classList.add('flex'); }
+        function closeLogoutModal() { document.getElementById('logoutModal').classList.add('hidden'); document.getElementById('logoutModal').classList.remove('flex'); }
+        function confirmLogout() { closeLogoutModal(); setTimeout(() => { sessionStorage.removeItem('pz_admin_session'); window.location.href = 'admin-login.html'; }, 300); }
+        function getInitials(name) { return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase(); }
+        function getAvatarBg(id) { return avatarBgColors[id % avatarBgColors.length]; }
+
+        function renderTable() {
+            const tbody = document.getElementById('studentsTableBody');
+            const start = (currentPage - 1) * perPage;
+            const end = start + perPage;
+            const pageData = filteredStudents.slice(start, end);
+            if (pageData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="py-12 text-center text-on-surface-variant text-sm">No students found</td></tr>';
+            } else {
+                tbody.innerHTML = pageData.map((s, idx) => `
+                    <tr class="student-row hover:bg-emerald-50/30 transition-colors cursor-pointer ${idx % 2 === 1 ? 'bg-surface-container-lowest/40' : ''}" onclick="selectStudent(${s.id})">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full ${getAvatarBg(s.id)} flex items-center justify-center text-xs font-display font-bold flex-shrink-0">${getInitials(s.name)}</div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-bold text-on-surface">${s.name}</p>
+                                    <p class="text-xs text-on-surface-variant">${s.email}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4"><p class="text-xs font-medium text-on-surface-variant">${s.enrolled}</p></td>
+                        <td class="px-6 py-4">
+                            <div class="w-32">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-[0.65rem] font-bold ${s.progress < 30 ? 'text-error' : 'text-secondary'}">${s.progress}%</span>
+                                </div>
+                                <div class="h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden">
+                                    <div class="h-full ${s.progress < 30 ? 'bg-error' : 'bg-secondary'} rounded-full" style="width: ${s.progress}%"></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4"><p class="text-xs font-semibold text-on-surface">${s.quizzesPassed}/${s.quizzesTotal}</p></td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-0.5 rounded-md ${s.status === 'active' ? 'bg-secondary/10 text-secondary' : 'bg-error/10 text-error'} text-[0.65rem] font-bold uppercase tracking-wider">${s.status}</span>
+                        </td>
+                        <td class="px-6 py-4 text-right" onclick="event.stopPropagation()">
+                            <div class="flex justify-end gap-2">
+                                <button onclick="selectStudent(${s.id})" class="p-1.5 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-lg">visibility</span></button>
+                                <button onclick="toggleSuspend(${s.id})" class="p-1.5 text-on-surface-variant ${s.status === 'active' ? 'hover:text-error' : 'hover:text-secondary'} transition-colors"><span class="material-symbols-outlined text-lg">${s.status === 'active' ? 'block' : 'restore'}</span></button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            document.getElementById('showingCount').textContent = filteredStudents.length > 0 ? `${start + 1}-${Math.min(end, filteredStudents.length)}` : '0';
+            document.getElementById('totalCount').textContent = filteredStudents.length;
+            document.getElementById('prevPage').disabled = currentPage <= 1;
+            document.getElementById('nextPage').disabled = end >= filteredStudents.length;
+            renderPageNumbers();
+        }
+
+        function renderPageNumbers() {
+            const totalPages = Math.ceil(filteredStudents.length / perPage);
+            const container = document.getElementById('pageNumbers');
+            if (!container) return;
+            let html = '';
+            for (let i = 1; i <= Math.min(totalPages, 5); i++) {
+                html += `<button onclick="goToPage(${i})" class="w-6 h-6 rounded flex items-center justify-center text-xs font-bold ${i === currentPage ? 'bg-primary text-white' : 'text-on-surface-variant hover:bg-surface-container-highest'}">${i}</button>`;
+            }
+            container.innerHTML = html;
+        }
+
+        function goToPage(page) { currentPage = page; renderTable(); renderMobileList(); }
+
+        function renderMobileList() {
+            const container = document.getElementById('mobileStudentList');
+            const start = (currentPage - 1) * perPage;
+            const end = start + perPage;
+            const pageData = filteredStudents.slice(start, end);
+            if (pageData.length === 0) {
+                container.innerHTML = '<div class="text-center py-12 text-on-surface-variant text-sm">No students found</div>';
+            } else {
+                container.innerHTML = pageData.map(s => `
+                    <div class="bg-surface-container-lowest rounded-xl p-4 border border-outline-variant/10 student-card cursor-pointer active:bg-surface-container/50 transition-colors" onclick="openDetailSheet(${s.id})">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="relative">
+                                <div class="w-12 h-12 rounded-lg ${getAvatarBg(s.id)} flex items-center justify-center text-sm font-display font-bold">${getInitials(s.name)}</div>
+                                <div class="absolute -bottom-1 -right-1 w-3.5 h-3.5 ${s.status === 'active' ? 'bg-secondary' : 'bg-error'} border-2 border-white rounded-full"></div>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="font-display font-bold text-on-surface tracking-tight truncate">${s.name}</h4>
+                                <p class="text-xs text-on-surface-variant truncate">${s.email}</p>
+                            </div>
+                            <div class="flex flex-col items-end gap-2">
+                                <span class="${s.status === 'active' ? 'bg-secondary/10 text-secondary' : 'bg-error/10 text-error'} text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">${s.status}</span>
+                                <span class="material-symbols-outlined text-on-surface-variant text-sm">chevron_right</span>
+                            </div>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex justify-between items-center text-[10px] font-label uppercase tracking-widest text-on-surface-variant">
+                                <span>Course Progress</span>
+                                <span>${s.progress}%</span>
+                            </div>
+                            <div class="h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden">
+                                <div class="h-full ${s.progress < 30 ? 'bg-error' : 'bg-gradient-to-r from-primary to-primary-container'} rounded-full" style="width: ${s.progress}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            document.getElementById('showingCountMobile').textContent = filteredStudents.length > 0 ? `${start + 1}-${Math.min(end, filteredStudents.length)}` : '0';
+            document.getElementById('totalCountMobile').textContent = filteredStudents.length;
+            document.getElementById('prevPageMobile').disabled = currentPage <= 1;
+            document.getElementById('nextPageMobile').disabled = end >= filteredStudents.length;
+        }
+
+        function filterStudents() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const course = document.getElementById('courseFilter').value;
+            filteredStudents = students.filter(s => {
+                const matchSearch = !search || s.name.toLowerCase().includes(search) || s.email.toLowerCase().includes(search);
+                const matchStatus = currentFilter === 'all' || s.status === currentFilter;
+                const matchCourse = !course || s.courses.includes(course);
+                return matchSearch && matchStatus && matchCourse;
+            });
+            currentPage = 1;
+            renderTable();
+            renderMobileList();
+        }
+
+        function setFilter(filter) {
+            currentFilter = filter;
+            // Desktop filter buttons
+            ['all', 'active', 'suspended'].forEach(f => {
+                const btn = document.getElementById(`filter-${f}`);
+                if (btn) {
+                    if (f === filter) { btn.classList.add('bg-white', 'text-primary', 'font-bold', 'shadow-sm'); btn.classList.remove('text-on-surface-variant', 'font-medium'); }
+                    else { btn.classList.remove('bg-white', 'text-primary', 'font-bold', 'shadow-sm'); btn.classList.add('text-on-surface-variant', 'font-medium'); }
+                }
+                const btnM = document.getElementById(`filter-${f}-m`);
+                if (btnM) {
+                    if (f === filter) { btnM.classList.add('bg-primary', 'text-white'); btnM.classList.remove('bg-surface-container', 'text-on-surface-variant'); }
+                    else { btnM.classList.remove('bg-primary', 'text-white'); btnM.classList.add('bg-surface-container', 'text-on-surface-variant'); }
+                }
+            });
+            filterStudents();
+        }
+
+        function changePage(delta) { currentPage += delta; renderTable(); renderMobileList(); }
+
+        function selectStudent(id) {
+            selectedStudentId = id;
+            const student = students.find(s => s.id === id);
+            if (!student) return;
+            const content = document.getElementById('detailPanelContent');
+            content.innerHTML = `
+                <div class="p-6 border-b border-outline-variant/10 bg-surface-container-low">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="relative">
+                            <div class="w-20 h-20 rounded-2xl ${getAvatarBg(student.id)} flex items-center justify-center text-xl font-display font-bold ring-4 ring-white shadow-lg">${getInitials(student.name)}</div>
+                            <div class="absolute -bottom-1 -right-1 w-6 h-6 ${student.status === 'active' ? 'bg-secondary' : 'bg-error'} border-2 border-white rounded-full flex items-center justify-center">
+                                <span class="material-symbols-outlined text-[10px] text-white" style="font-variation-settings: 'FILL' 1;">${student.status === 'active' ? 'check' : 'block'}</span>
+                            </div>
+                        </div>
+                        <span class="px-2 py-1 rounded ${student.status === 'active' ? 'bg-secondary/10 text-secondary' : 'bg-error/10 text-error'} text-[0.6rem] font-bold uppercase tracking-widest">${student.status === 'active' ? 'Active Member' : 'Suspended'}</span>
+                    </div>
+                    <h4 class="text-xl font-headline font-bold text-on-surface leading-tight">${student.name}</h4>
+                    <p class="text-sm text-on-surface-variant mb-4">${student.email}</p>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="p-2 bg-white rounded-lg text-center border border-outline-variant/10 shadow-sm">
+                            <p class="text-[0.6rem] text-on-surface-variant uppercase font-bold">Progress</p>
+                            <p class="text-lg font-black text-primary">${student.progress}%</p>
+                        </div>
+                        <div class="p-2 bg-white rounded-lg text-center border border-outline-variant/10 shadow-sm">
+                            <p class="text-[0.6rem] text-on-surface-variant uppercase font-bold">Quizzes</p>
+                            <p class="text-lg font-black text-primary">${student.quizzesPassed}</p>
+                        </div>
+                        <div class="p-2 bg-white rounded-lg text-center border border-outline-variant/10 shadow-sm">
+                            <p class="text-[0.6rem] text-on-surface-variant uppercase font-bold">Certs</p>
+                            <p class="text-lg font-black text-primary">${student.certificates}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6 space-y-6">
+                    <div>
+                        <h5 class="text-[0.7rem] uppercase font-bold tracking-widest text-on-surface-variant mb-3 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-sm">school</span> Enrolled Courses
+                        </h5>
+                        <ul class="space-y-3">
+                            ${student.courses.map(c => `
+                                <li class="flex items-center justify-between p-3 bg-surface-container-low rounded-lg group hover:bg-emerald-50/50 transition-colors">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 bg-primary/10 rounded flex items-center justify-center text-primary">
+                                            <span class="material-symbols-outlined text-sm">${courseIcons[c] || 'menu_book'}</span>
+                                        </div>
+                                        <span class="text-xs font-semibold text-on-surface">${courseNames[c] || c}</span>
+                                    </div>
+                                    <span class="material-symbols-outlined text-sm text-on-surface-variant group-hover:text-primary">chevron_right</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border border-outline-variant/20">
+                        <div class="space-y-3">
+                            <div class="flex justify-between"><span class="text-xs text-on-surface-variant">Student ID</span><span class="text-xs font-bold text-on-surface">#PZ-${String(student.id).padStart(4, '0')}</span></div>
+                            <div class="flex justify-between"><span class="text-xs text-on-surface-variant">Enrolled Date</span><span class="text-xs font-bold text-on-surface">${student.enrolled}</span></div>
+                            <div class="flex justify-between"><span class="text-xs text-on-surface-variant">Last Active</span><span class="text-xs font-bold text-on-surface">${student.lastActive}</span></div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 gap-2 pt-2">
+                        <button class="w-full py-3 bg-primary text-white font-bold text-xs rounded-md shadow-md hover:opacity-90 transition-opacity uppercase tracking-widest flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-sm">mail</span> Send Email
+                        </button>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button class="py-2.5 bg-white border border-outline-variant/30 text-on-surface font-bold text-xs rounded-md hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined text-sm">lock_open</span> Unlock
+                            </button>
+                            <button onclick="toggleSuspend(${student.id})" class="py-2.5 ${student.status === 'active' ? 'bg-error/5 border-error/20 text-error hover:bg-error/10' : 'bg-secondary/5 border-secondary/20 text-secondary hover:bg-secondary/10'} border font-bold text-xs rounded-md transition-colors flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined text-sm">${student.status === 'active' ? 'block' : 'restore'}</span> ${student.status === 'active' ? 'Suspend' : 'Restore'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function openDetailSheet(id) {
+            selectedStudentId = id;
+            const student = students.find(s => s.id === id);
+            if (!student) return;
+            const content = document.getElementById('detailSheetContent');
+            content.innerHTML = `
+                <div class="p-6 border-b border-outline-variant/10">
+                    <div class="flex flex-col items-center text-center mb-6">
+                        <div class="relative mb-4">
+                            <div class="w-24 h-24 rounded-2xl ${getAvatarBg(student.id)} flex items-center justify-center text-2xl font-display font-bold ring-4 ring-primary/20">${getInitials(student.name)}</div>
+                            <div class="absolute -bottom-2 right-0 ${student.status === 'active' ? 'bg-secondary' : 'bg-error'} text-white p-1 rounded-lg">
+                                <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">${student.status === 'active' ? 'verified' : 'block'}</span>
+                            </div>
+                        </div>
+                        <h2 class="text-2xl font-headline font-bold text-on-surface">${student.name}</h2>
+                        <p class="text-on-surface-variant font-body text-sm">Enrolled since ${student.enrolled}</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="bg-surface-container-low p-4 rounded-2xl border border-outline-variant/10">
+                            <span class="material-symbols-outlined text-primary mb-2">auto_stories</span>
+                            <p class="text-xs font-label uppercase tracking-widest text-on-surface-variant">Courses</p>
+                            <p class="text-xl font-bold text-on-surface">${student.courses.length} Total</p>
+                        </div>
+                        <div class="bg-surface-container-low p-4 rounded-2xl border border-outline-variant/10">
+                            <span class="material-symbols-outlined text-primary mb-2">schedule</span>
+                            <p class="text-xs font-label uppercase tracking-widest text-on-surface-variant">Last Active</p>
+                            <p class="text-xl font-bold text-on-surface">${student.lastActive}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div>
+                        <h5 class="text-[0.7rem] uppercase font-bold tracking-widest text-on-surface-variant mb-3 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-sm">school</span> Enrolled Courses
+                        </h5>
+                        <ul class="space-y-2">
+                            ${student.courses.map(c => `
+                                <li class="flex items-center justify-between p-3 bg-surface-container-low rounded-lg">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 bg-primary/10 rounded flex items-center justify-center text-primary">
+                                            <span class="material-symbols-outlined text-sm">${courseIcons[c] || 'menu_book'}</span>
+                                        </div>
+                                        <span class="text-xs font-semibold text-on-surface">${courseNames[c] || c}</span>
+                                    </div>
+                                    <span class="material-symbols-outlined text-sm text-on-surface-variant">chevron_right</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border border-outline-variant/20">
+                        <div class="space-y-3">
+                            <div class="flex justify-between"><span class="text-xs text-on-surface-variant">Student ID</span><span class="text-xs font-bold text-on-surface">#PZ-${String(student.id).padStart(4, '0')}</span></div>
+                            <div class="flex justify-between"><span class="text-xs text-on-surface-variant">Progress</span><span class="text-xs font-bold text-on-surface">${student.progress}%</span></div>
+                            <div class="flex justify-between"><span class="text-xs text-on-surface-variant">Quizzes</span><span class="text-xs font-bold text-on-surface">${student.quizzesPassed}/${student.quizzesTotal}</span></div>
+                            <div class="flex justify-between"><span class="text-xs text-on-surface-variant">Certificates</span><span class="text-xs font-bold text-on-surface">${student.certificates}</span></div>
+                        </div>
+                    </div>
+                    <div class="flex gap-3 pt-2">
+                        <button class="flex-1 bg-gradient-to-br from-primary to-primary-container text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-transform">
+                            <span class="material-symbols-outlined">mail</span> Email
+                        </button>
+                        <button onclick="toggleSuspend(${student.id}); closeDetailSheet();" class="px-6 py-4 rounded-xl ${student.status === 'active' ? 'bg-error/5 text-error border-error/20' : 'bg-secondary/5 text-secondary border-secondary/20'} border font-bold active:scale-95 transition-transform">
+                            ${student.status === 'active' ? 'Suspend' : 'Restore'}
+                        </button>
+                    </div>
+                    <div class="h-8"></div>
+                </div>
+            `;
+            document.getElementById('detailOverlay').classList.remove('hidden');
+            const sheet = document.getElementById('detailSheet');
+            sheet.classList.remove('hidden');
+            sheet.classList.remove('closed');
+            sheet.classList.add('open');
+        }
+
+        function closeDetailSheet() {
+            const sheet = document.getElementById('detailSheet');
+            sheet.classList.remove('open');
+            sheet.classList.add('closed');
+            setTimeout(() => {
+                document.getElementById('detailOverlay').classList.add('hidden');
+                sheet.classList.add('hidden');
+            }, 300);
+        }
+
+        function toggleSuspend(id) {
+            suspendTargetId = id;
+            const student = students.find(s => s.id === id);
+            isSuspending = student.status === 'active';
+            document.getElementById('suspendTitle').textContent = isSuspending ? 'Suspend Student?' : 'Restore Access?';
+            document.getElementById('suspendText').textContent = isSuspending ? 'This will temporarily revoke their access to all courses.' : 'This will restore the student\'s access to all enrolled courses.';
+            document.getElementById('suspendIcon').className = `w-16 h-16 mx-auto rounded-full ${isSuspending ? 'bg-error/10' : 'bg-secondary/10'} flex items-center justify-center mb-4`;
+            document.getElementById('suspendIcon').innerHTML = `<span class="material-symbols-outlined text-3xl ${isSuspending ? 'text-error' : 'text-secondary'}">${isSuspending ? 'block' : 'restore'}</span>`;
+            document.getElementById('confirmSuspendBtn').textContent = isSuspending ? 'Suspend' : 'Restore';
+            document.getElementById('confirmSuspendBtn').className = `flex-1 px-4 py-3 rounded-lg text-sm font-semibold transition-colors ${isSuspending ? 'bg-error text-white hover:bg-error/90' : 'bg-secondary text-white hover:bg-secondary/90'}`;
+            document.getElementById('suspendModal').classList.remove('hidden');
+            document.getElementById('suspendModal').classList.add('flex');
+        }
+        function closeSuspendModal() {
+            document.getElementById('suspendModal').classList.add('hidden');
+            document.getElementById('suspendModal').classList.remove('flex');
+            suspendTargetId = null;
+        }
+        function confirmSuspend() {
+            if (suspendTargetId === null) return;
+            const student = students.find(s => s.id === suspendTargetId);
+            student.status = isSuspending ? 'suspended' : 'active';
+            closeSuspendModal();
+            filterStudents();
+            if (selectedStudentId === suspendTargetId) selectStudent(suspendTargetId);
+            showToast(isSuspending ? `${student.name} has been suspended` : `${student.name} access restored`, 'success');
+        }
+        function exportStudents() { showToast('Export started. File will download shortly.', 'success'); }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = message;
+            const icon = document.getElementById('toastIcon');
+            icon.textContent = type === 'success' ? 'check_circle' : 'error';
+            icon.className = `material-symbols-outlined text-lg ${type === 'success' ? 'text-emerald-400' : 'text-red-400'}`;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            toast.classList.add('opacity-100');
+            setTimeout(() => { toast.classList.add('opacity-0', 'pointer-events-none'); }, 3000);
+        }
+
+        const admin = checkSession();
+        if (admin) { populateAdminInfo(admin); }
+        filterStudents();
+        renderMobileList();
+    </script>
+</body>
+</html>
