@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Course Manager | PZ Academy</title>
+<meta name="robots" content="noindex, nofollow">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800;900&amp;family=Inter:wght@300;400;500;600&amp;family=Montserrat:wght@700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface": "#f8f9fa", "primary": "#005539", "primary-container": "#04704d",
+                      "on-surface": "#191c1d", "on-surface-variant": "#3f4943", "outline-variant": "#bec9c1",
+                      "surface-container-lowest": "#ffffff", "surface-container": "#edeeef",
+                      "surface-container-low": "#f3f4f5", "surface-container-high": "#e7e8e9",
+                      "secondary": "#006d37", "secondary-container": "#6bfe9c", "on-secondary-container": "#00743a",
+                      "error": "#ba1a1a", "tertiary": "#7c3230", "tertiary-container": "#9a4946",
+                      "surface-container-highest": "#e1e3e4", "outline": "#6f7a72"
+              },
+              "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+              "fontFamily": { "headline": ["Montserrat"], "body": ["Inter"], "label": ["Inter"], "display": ["Public Sans"] }
+            },
+          },
+        }
+      </script>
+<style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+        .clinical-shadow { box-shadow: 0 1px 3px rgba(25, 28, 29, 0.04); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .animate-fadeIn { animation: fadeIn 0.3s ease-out forwards; }
+        .animate-scaleIn { animation: scaleIn 0.2s ease-out forwards; }
+        .sidebar-link { transition: all 0.2s ease; }
+        .sidebar-link:hover { background: rgba(255,255,255,0.05); }
+        .sidebar-link.active { background: rgba(16, 185, 129, 0.05); }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f8f9fa; }
+        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 3px; }
+        .tab-btn.active { color: #005539; border-color: #005539; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        @media (max-width: 768px) { .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 40; } }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased flex h-screen overflow-hidden">
+
+    <div id="sessionExpiredModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-on-surface/40 backdrop-blur-sm"></div>
+        <div class="relative bg-white w-full max-w-sm rounded-xl p-8 text-center animate-scaleIn shadow-2xl">
+            <div class="w-16 h-16 mx-auto rounded-full bg-error/10 flex items-center justify-center mb-4">
+                <span class="material-symbols-outlined text-3xl text-error">lock_clock</span>
+            </div>
+            <h2 class="font-display font-black text-xl text-on-surface mb-2">Session Expired</h2>
+            <p class="text-on-surface-variant text-sm mb-6">Your session has timed out. Please log in again.</p>
+            <a href="admin-login.html" class="inline-block bg-gradient-to-r from-primary to-primary-container px-8 py-3 rounded-lg text-white font-display font-bold text-sm tracking-wider uppercase shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all">Return to Login</a>
+        </div>
+    </div>
+
+    <div id="sidebarOverlay" class="sidebar-overlay hidden md:hidden" onclick="toggleSidebar()"></div>
+
+    <aside id="sidebar" class="bg-slate-950 h-screen w-64 flex flex-col py-6 shrink-0 z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
+        <div class="px-6 mb-10">
+            <h1 class="text-xl font-bold tracking-tighter text-emerald-500 font-headline">PZ Academy</h1>
+            <p class="text-[10px] text-slate-500 font-label tracking-widest uppercase mt-1">Clinical Admin Portal</p>
+        </div>
+        <nav class="flex-1 px-3 space-y-1">
+            <a href="admin-dashboard.html" class="sidebar-link flex items-center px-3 py-2.5 rounded-lg text-slate-400 hover:text-slate-100">
+                <span class="material-symbols-outlined mr-3 text-sm">dashboard</span>
+                <span class="font-display font-medium text-sm tracking-tight">Dashboard</span>
+            </a>
+            <a href="admin-students.html" class="sidebar-link flex items-center px-3 py-2.5 rounded-lg text-slate-400 hover:text-slate-100">
+                <span class="material-symbols-outlined mr-3 text-sm">group</span>
+                <span class="font-display font-medium text-sm tracking-tight">Students</span>
+            </a>
+            <a href="admin-course-manager.html" class="sidebar-link active flex items-center px-3 py-2.5 rounded-lg text-emerald-400 border-r-2 border-emerald-500 bg-emerald-500/5">
+                <span class="material-symbols-outlined mr-3 text-sm" style="font-variation-settings: 'FILL' 1;">school</span>
+                <span class="font-display font-semibold text-sm tracking-tight">Courses</span>
+            </a>
+            <a href="admin-quiz-builder.html" class="sidebar-link flex items-center px-3 py-2.5 rounded-lg text-slate-400 hover:text-slate-100">
+                <span class="material-symbols-outlined mr-3 text-sm">quiz</span>
+                <span class="font-display font-medium text-sm tracking-tight">Quiz Builder</span>
+            </a>
+            <a href="#" class="sidebar-link flex items-center px-3 py-2.5 rounded-lg text-slate-400 hover:text-slate-100">
+                <span class="material-symbols-outlined mr-3 text-sm">workspace_premium</span>
+                <span class="font-display font-medium text-sm tracking-tight">Certificates</span>
+            </a>
+            <a href="#" class="sidebar-link flex items-center px-3 py-2.5 rounded-lg text-slate-400 hover:text-slate-100">
+                <span class="material-symbols-outlined mr-3 text-sm">settings</span>
+                <span class="font-display font-medium text-sm tracking-tight">Settings</span>
+            </a>
+        </nav>
+        <div class="px-6 mt-auto">
+            <button onclick="showLogoutModal()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-2.5 rounded-md text-xs transition-all active:scale-95 duration-150 flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-sm">logout</span>
+                Sign Out
+            </button>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col relative overflow-hidden">
+        <header class="fixed top-0 right-0 md:w-[calc(100%-16rem)] w-full z-40 bg-white/70 backdrop-blur-md flex items-center justify-between px-4 md:px-8 h-16 border-b border-outline-variant/10">
+            <div class="flex items-center gap-4 flex-1">
+                <button onclick="toggleSidebar()" class="md:hidden p-2 rounded-lg text-on-surface-variant hover:bg-on-surface/5 transition-colors">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+                <h2 class="font-headline text-lg font-bold text-on-surface hidden sm:block">Course Management</h2>
+                <h2 class="font-headline text-base font-bold text-on-surface sm:hidden">Courses</h2>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="openCourseModal()" class="bg-gradient-to-r from-primary to-primary-container text-on-primary px-4 md:px-5 py-2 rounded-md font-semibold text-sm shadow-lg hover:shadow-emerald-900/10 transition-all active:scale-95 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">add</span>
+                    <span class="hidden sm:inline">New Course</span>
+                </button>
+                <div id="topAvatar" class="hidden md:flex h-8 w-8 rounded-full bg-gradient-to-br from-primary to-primary-container items-center justify-center text-white text-[10px] font-display font-bold">SA</div>
+            </div>
+        </header>
+
+        <main class="mt-16 flex-1 overflow-y-auto bg-surface">
+            <div class="bg-surface-container-low border-b border-outline-variant/10">
+                <div class="px-4 md:px-8">
+                    <div class="flex gap-6 overflow-x-auto no-scrollbar">
+                        <button onclick="switchTab('courses')" id="tab-courses" class="tab-btn active text-primary font-bold border-b-2 border-primary py-3 text-sm whitespace-nowrap transition-colors">All Courses</button>
+                        <button onclick="switchTab('modules')" id="tab-modules" class="tab-btn text-on-surface-variant font-medium py-3 text-sm whitespace-nowrap hover:text-primary transition-colors">Modules</button>
+                        <button onclick="switchTab('lessons')" id="tab-lessons" class="tab-btn text-on-surface-variant font-medium py-3 text-sm whitespace-nowrap hover:text-primary transition-colors">Lessons</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="content-courses" class="p-4 md:p-8 space-y-6">
+                <div class="hidden md:block max-w-4xl mb-8">
+                    <p class="text-[10px] text-primary font-bold tracking-[0.2em] mb-3 uppercase">Curriculum Overview</p>
+                    <h3 class="text-3xl font-headline font-black text-on-surface leading-tight">Active Clinical Pathways &amp; <br/><span class="text-primary-container">Pharmacology Specializations.</span></h3>
+                    <div class="w-16 h-1 bg-primary mt-6"></div>
+                </div>
+
+                <div class="bg-surface-container-lowest rounded-xl clinical-shadow border border-outline-variant/10 overflow-hidden animate-fadeIn">
+                    <div class="flex flex-col md:flex-row">
+                        <div class="w-full md:w-64 h-40 md:h-auto relative overflow-hidden bg-gradient-to-br from-emerald-600 to-emerald-900 flex items-center justify-center flex-shrink-0">
+                            <span class="material-symbols-outlined text-white/40 text-5xl">science</span>
+                        </div>
+                        <div class="flex-1 p-4 md:p-8 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-start justify-between mb-2">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-secondary-container/20 text-on-secondary-container tracking-widest uppercase">Published</span>
+                                    <span class="text-2xl font-black text-primary hidden md:block">68%</span>
+                                </div>
+                                <h4 class="text-lg font-headline font-bold text-on-surface mb-1">Safe Prescribing</h4>
+                                <p class="text-sm text-on-surface-variant leading-relaxed mb-4">Foundations of safe and effective prescribing practices for clinical pharmacologists.</p>
+                                <div class="flex flex-wrap items-center gap-4 md:gap-6 text-xs">
+                                    <div class="flex items-center gap-1.5"><span class="material-symbols-outlined text-primary text-lg">view_module</span><span class="font-semibold text-on-surface">3 <span class="text-on-surface-variant font-normal">Modules</span></span></div>
+                                    <div class="flex items-center gap-1.5"><span class="material-symbols-outlined text-primary text-lg">list_alt</span><span class="font-semibold text-on-surface">12 <span class="text-on-surface-variant font-normal">Lessons</span></span></div>
+                                    <div class="flex items-center gap-1.5"><span class="material-symbols-outlined text-primary text-lg">groups</span><span class="font-semibold text-on-surface">54 <span class="text-on-surface-variant font-normal">Students</span></span></div>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between mt-4 pt-4 border-t border-surface-container-high">
+                                <div class="flex items-center gap-1">
+                                    <button onclick="editCourse(0)" class="px-3 py-1.5 text-xs font-bold text-primary hover:bg-primary/5 rounded-md transition-all active:scale-95">Edit</button>
+                                    <button onclick="viewCourseModules(0)" class="px-3 py-1.5 text-xs font-bold text-primary hover:bg-primary/5 rounded-md transition-all active:scale-95">Modules</button>
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <button class="p-1.5 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-lg">visibility</span></button>
+                                    <button onclick="toggleCourseStatus(0)" class="p-1.5 text-on-surface-variant hover:text-error transition-colors"><span class="material-symbols-outlined text-lg">cloud_off</span></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-surface-container-lowest rounded-xl clinical-shadow border border-outline-variant/10 overflow-hidden animate-fadeIn">
+                    <div class="flex flex-col md:flex-row">
+                        <div class="w-full md:w-64 h-40 md:h-auto relative overflow-hidden bg-gradient-to-br from-blue-600 to-blue-900 flex items-center justify-center flex-shrink-0">
+                            <span class="material-symbols-outlined text-white/40 text-5xl">psychology</span>
+                        </div>
+                        <div class="flex-1 p-4 md:p-8 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-start justify-between mb-2">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-secondary-container/20 text-on-secondary-container tracking-widest uppercase">Published</span>
+                                    <span class="text-2xl font-black text-primary hidden md:block">82%</span>
+                                </div>
+                                <h4 class="text-lg font-headline font-bold text-on-surface mb-1">Clinical Therapeutics</h4>
+                                <p class="text-sm text-on-surface-variant leading-relaxed mb-4">Evidence-based treatment strategies for common clinical conditions.</p>
+                                <div class="flex flex-wrap items-center gap-4 md:gap-6 text-xs">
+                                    <div class="flex items-center gap-1.5"><span class="material-symbols-outlined text-primary text-lg">view_module</span><span class="font-semibold text-on-surface">3 <span class="text-on-surface-variant font-normal">Modules</span></span></div>
+                                    <div class="flex items-center gap-1.5"><span class="material-symbols-outlined text-primary text-lg">list_alt</span><span class="font-semibold text-on-surface">12 <span class="text-on-surface-variant font-normal">Lessons</span></span></div>
+                                    <div class="flex items-center gap-1.5"><span class="material-symbols-outlined text-primary text-lg">groups</span><span class="font-semibold text-on-surface">58 <span class="text-on-surface-variant font-normal">Students</span></span></div>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between mt-4 pt-4 border-t border-surface-container-high">
+                                <div class="flex items-center gap-1">
+                                    <button onclick="editCourse(1)" class="px-3 py-1.5 text-xs font-bold text-primary hover:bg-primary/5 rounded-md transition-all active:scale-95">Edit</button>
+                                    <button onclick="viewCourseModules(1)" class="px-3 py-1.5 text-xs font-bold text-primary hover:bg-primary/5 rounded-md transition-all active:scale-95">Modules</button>
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <button class="p-1.5 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-lg">visibility</span></button>
+                                    <button onclick="toggleCourseStatus(1)" class="p-1.5 text-on-surface-variant hover:text-error transition-colors"><span class="material-symbols-outlined text-lg">cloud_off</span></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-surface-container-lowest rounded-xl clinical-shadow border border-outline-variant/10 overflow-hidden animate-fadeIn opacity-75">
+                    <div class="flex flex-col md:flex-row">
+                        <div class="w-full md:w-64 h-40 md:h-auto relative overflow-hidden bg-surface-container flex items-center justify-center flex-shrink-0">
+                            <span class="material-symbols-outlined text-outline text-5xl">precision_manufacturing</span>
+                        </div>
+                        <div class="flex-1 p-4 md:p-8 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-start justify-between mb-2">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-surface-container-high text-on-surface-variant tracking-widest uppercase">Draft</span>
+                                    <span class="text-2xl font-black text-on-surface-variant opacity-30 hidden md:block">0%</span>
+                                </div>
+                                <h4 class="text-lg font-headline font-bold text-on-surface/50 mb-1">IV Therapy &amp; Safety</h4>
+                                <p class="text-sm text-on-surface-variant/60 leading-relaxed mb-4">Intravenous therapy protocols, safety measures, and complication management.</p>
+                                <div class="flex flex-wrap items-center gap-4 md:gap-6 text-xs opacity-50">
+                                    <div class="flex items-center gap-1.5"><span class="material-symbols-outlined text-outline text-lg">view_module</span><span class="font-semibold text-on-surface">3 <span class="text-on-surface-variant font-normal">Modules</span></span></div>
+                                    <div class="flex items-center gap-1.5"><span class="material-symbols-outlined text-outline text-lg">list_alt</span><span class="font-semibold text-on-surface">0 <span class="text-on-surface-variant font-normal">Lessons</span></span></div>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between mt-4 pt-4 border-t border-surface-container-high">
+                                <div class="flex items-center gap-1">
+                                    <button onclick="editCourse(3)" class="px-3 py-1.5 text-xs font-bold text-primary hover:bg-primary/5 rounded-md transition-all active:scale-95">Resume Editing</button>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button class="px-4 py-2 bg-primary text-on-primary text-[10px] font-bold uppercase tracking-widest rounded-md hover:bg-primary-container transition-colors">Publish</button>
+                                    <button class="p-1.5 text-on-surface-variant hover:text-error transition-colors"><span class="material-symbols-outlined text-lg">delete</span></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="content-modules" class="hidden p-4 md:p-8 space-y-4">
+                <div class="bg-surface-container-lowest rounded-xl clinical-shadow border border-outline-variant/10 p-4 animate-fadeIn">
+                    <div class="flex flex-col sm:flex-row sm:items-end gap-4">
+                        <div class="flex-1">
+                            <label class="text-[10px] font-label font-bold text-on-surface-variant tracking-wider uppercase mb-2 block">Select Course</label>
+                            <select id="moduleCourseSelect" onchange="loadModules()" class="w-full appearance-none bg-surface-container-lowest border border-outline-variant/15 rounded-lg px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-primary/10 transition-all text-on-surface">
+                                <option value="">Choose a course...</option>
+                                <option value="0">Safe Prescribing</option>
+                                <option value="1">Clinical Therapeutics</option>
+                                <option value="2">Special Populations</option>
+                                <option value="3">IV Therapy &amp; Safety</option>
+                            </select>
+                        </div>
+                        <button onclick="openModuleModal()" class="bg-gradient-to-r from-primary to-primary-container text-on-primary px-5 py-2.5 rounded-md font-semibold text-sm shadow-lg hover:shadow-emerald-900/10 transition-all active:scale-95 flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-sm">add</span>
+                            Add Module
+                        </button>
+                    </div>
+                </div>
+                <div id="modulesList" class="space-y-3">
+                    <div class="bg-surface-container-lowest rounded-xl clinical-shadow border border-outline-variant/10 p-8 text-center text-on-surface-variant text-sm">Select a course to view its modules</div>
+                </div>
+            </div>
+
+            <div id="content-lessons" class="hidden p-4 md:p-8 space-y-4">
+                <div class="bg-surface-container-lowest rounded-xl clinical-shadow border border-outline-variant/10 p-4 animate-fadeIn">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="text-[10px] font-label font-bold text-on-surface-variant tracking-wider uppercase mb-2 block">Course</label>
+                            <select id="lessonCourseSelect" onchange="updateLessonModules()" class="w-full appearance-none bg-surface-container-lowest border border-outline-variant/15 rounded-lg px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-primary/10 transition-all text-on-surface">
+                                <option value="">Choose a course...</option>
+                                <option value="0">Safe Prescribing</option>
+                                <option value="1">Clinical Therapeutics</option>
+                                <option value="2">Special Populations</option>
+                                <option value="3">IV Therapy &amp; Safety</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-label font-bold text-on-surface-variant tracking-wider uppercase mb-2 block">Module</label>
+                            <select id="lessonModuleSelect" class="w-full appearance-none bg-surface-container-lowest border border-outline-variant/15 rounded-lg px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-primary/10 transition-all text-on-surface disabled:opacity-50" disabled>
+                                <option value="">Select course first</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="openLessonModal()" class="w-full bg-gradient-to-r from-primary to-primary-container text-on-primary px-5 py-2.5 rounded-md font-semibold text-sm shadow-lg hover:shadow-emerald-900/10 transition-all active:scale-95 flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined text-sm">add</span>
+                                Add Lesson
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div id="lessonsList" class="space-y-2">
+                    <div class="bg-surface-container-lowest rounded-xl clinical-shadow border border-outline-variant/10 p-8 text-center text-on-surface-variant text-sm">Select a course and module to view lessons</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="courseModal" class="fixed inset-0 z-[60] hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-on-surface/40 backdrop-blur-sm" onclick="closeCourseModal()"></div>
+        <div class="relative bg-white w-full max-w-lg rounded-xl animate-scaleIn max-h-[90vh] overflow-y-auto clinical-shadow">
+            <div class="p-6 border-b border-outline-variant/15 flex items-center justify-between">
+                <h3 class="font-headline text-lg font-bold text-on-surface" id="courseModalTitle">New Course</h3>
+                <button onclick="closeCourseModal()" class="p-2 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <div class="p-6 space-y-5">
+                <div><label class="text-[10px] font-label font-bold text-on-surface-variant tracking-wider uppercase mb-2 block">Course Title</label><input type="text" id="courseTitle" placeholder="e.g., Safe Prescribing" class="w-full h-12 bg-surface-container-lowest border border-outline-variant/15 rounded-lg px-4 text-on-surface text-sm placeholder:text-on-surface-variant/40 focus:ring-2 focus:ring-primary/10 outline-none transition-colors"/></div>
+                <div><label class="text-[10px] font-label font-bold text-on-surface-variant tracking-wider uppercase mb-2 block">Description</label><textarea id="courseDescription" rows="3" placeholder="Brief course description..." class="w-full bg-surface-container-lowest border border-outline-variant/15 rounded-lg px-4 py-3 text-on-surface text-sm placeholder:text-on-surface-variant/40 focus:ring-2 focus:ring-primary/10 outline-none transition-colors resize-none"></textarea></div>
+                <div><label class="text-[10px] font-label font-bold text-on-surface-variant tracking-wider uppercase mb-2 block">Category</label><select id="courseCategory" class="w-full h-12 bg-surface-container-lowest border border-outline-variant/15 rounded-lg px-4 text-on-surface text-sm focus:ring-2 focus:ring-primary/10 outline-none transition-colors appearance-none"><option value="core">Core Course</option><option value="elective">Elective</option><option value="workshop">Workshop</option><option value="webinar">Webinar</option></select></div>
+                <div class="flex items-center justify-between"><div><p class="text-sm font-medium text-on-surface">Publish Immediately</p><p class="text-[10px] text-on-surface-variant">Make course visible to students</p></div><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="coursePublished" class="sr-only peer"/><div class="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div></label></div>
+            </div>
+            <div class="p-6 border-t border-outline-variant/15 flex justify-end gap-3">
+                <button onclick="closeCourseModal()" class="px-5 py-2.5 rounded-lg border border-outline-variant text-on-surface-variant hover:text-on-surface text-sm transition-colors">Cancel</button>
+                <button onclick="saveCourse()" class="bg-gradient-to-r from-primary to-primary-container text-on-primary px-5 py-2.5 rounded-lg font-semibold text-sm shadow-lg hover:shadow-emerald-900/10 transition-all active:scale-95">Save Course</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="moduleModal" class="fixed inset-0 z-[60] hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-on-surface/40 backdrop-blur-sm" onclick="closeModuleModal()"></div>
+        <div class="relative bg-white w-full max-w-md rounded-xl animate-scaleIn clinical-shadow">
+            <div class="p-6 border-b border-outline-variant/15 flex items-center justify-between">
+                <h3 class="font-headline text-lg font-bold text-on-surface" id="moduleModalTitle">New Module</h3>
+                <button onclick="closeModuleModal()" class="p-2 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <div class="p-6 space-y-5">
+                <div><label class="text-[10px] font-label font-bold text-on-surface-variant tracking-wider uppercase mb-2 block">Module Title</label><input type="text" id="moduleTitle" placeholder="e.g., Module 1: Basics" class="w-full h-12 bg-surface-container-lowest border border-outline-variant/15 rounded-lg px-4 text-on-surface text-sm placeholder:text-on-surface-variant/40 focus:ring-2 focus:ring-primary/10 outline-none transition-colors"/></div>
+                <div><label class="text-[10px] font-label font-bold text-on-surface-variant tracking-wider uppercase mb-2 block">Order</label><input type="number" id="moduleOrder" value="1" min="1" class="w-full h-12 bg-surface-container-lowest border border-outline-variant/15 rounded-lg px-4 text-on-surface text-sm focus:ring-2 focus:ring-primary/10 outline-none transition-colors"/></div>
+            </div>
+            <div class="p-6 border-t border-outline-variant/15 flex justify-end gap-3">
+                <button onclick="closeModuleModal()" class="px-5 py-2.5 rounded-lg border border-outline-variant text-on-surface-variant hover:text-on-surface text-sm transition-colors">Cancel</button>
+                <button onclick="saveModule()" class="bg-gradient-to-r from-primary to-primary-container text-on-primary px-5 py-2.5 rounded-lg font-semibold text-sm shadow-lg hover:shadow-emerald-900/10 transition-all active:scale-95">Save Module</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="lessonModal" class="fixed inset-0 z-[60] hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-on-surface/40 backdrop-blur-sm" onclick="closeLessonModal()"></div>
+        <div class="relative bg-white w-full max-w-lg rounded-xl animate-scaleIn max-h-[90vh] overflow-y-auto clinical-shadow">
+            <div class="p-6 border-b border-outline-variant/15 flex items-center justify-between">
+                <h3 class="font-headline text-lg font-bold text-on-surface" id="lessonModalTitle">New Lesson</h3>
+                <button onclick="closeLessonModal()" class="p-2 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <div class="p-6 space-y-5">
+                <div><label class="text-[10px] font-label font-bold text-on-surface-variant tracking-wider uppercase mb-2 block">Lesson Title</label><input type="text" id="lessonTitle" placeholder="e.g., Day 1: Introduction" class="w-full h-12 bg-surface-container-lowest border border-outline-variant/15 rounded-lg px-4 text-on-surface text-sm placeholder:text-on-surface-variant/40 focus:ring-2 focus:ring-primary/10 outline-none transition-colors"/></div>
+                <div><label class="text-[10px] font-label font-bold text-on-surface-variant tracking-wider uppercase mb-2 block">YouTube Video URL</label><input type="text" id="lessonVideoUrl" placeholder="https://www.youtube.com/watch?v=..." class="w-full h-12 bg-surface-container-lowest border border-outline-variant/15 rounded-lg px-4 text-on-surface text-sm placeholder:text-on-surface-variant/40 focus:ring-2 focus:ring-primary/10 outline-none transition-colors"/></div>
+                <div><label class="text-[10px] font-label font-bold text-on-surface-variant tracking-wider uppercase mb-2 block">Duration (minutes)</label><input type="number" id="lessonDuration" value="30" min="1" class="w-full h-12 bg-surface-container-lowest border border-outline-variant/15 rounded-lg px-4 text-on-surface text-sm focus:ring-2 focus:ring-primary/10 outline-none transition-colors"/></div>
+            </div>
+            <div class="p-6 border-t border-outline-variant/15 flex justify-end gap-3">
+                <button onclick="closeLessonModal()" class="px-5 py-2.5 rounded-lg border border-outline-variant text-on-surface-variant hover:text-on-surface text-sm transition-colors">Cancel</button>
+                <button onclick="saveLesson()" class="bg-gradient-to-r from-primary to-primary-container text-on-primary px-5 py-2.5 rounded-lg font-semibold text-sm shadow-lg hover:shadow-emerald-900/10 transition-all active:scale-95">Save Lesson</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="logoutModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-on-surface/40 backdrop-blur-sm" onclick="closeLogoutModal()"></div>
+        <div class="relative bg-white w-full max-w-sm rounded-xl p-6 animate-scaleIn shadow-2xl">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-4"><span class="material-symbols-outlined text-3xl text-primary">logout</span></div>
+                <h3 class="font-display font-black text-xl text-on-surface mb-2">Sign Out?</h3>
+                <p class="text-on-surface-variant text-sm">Are you sure you want to sign out of your admin session?</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="closeLogoutModal()" class="flex-1 px-4 py-3 rounded-lg border border-outline-variant text-on-surface text-sm font-semibold hover:bg-surface-container transition-colors">Cancel</button>
+                <button onclick="confirmLogout()" class="flex-1 px-4 py-3 rounded-lg bg-error text-white text-sm font-semibold hover:bg-error/90 transition-colors">Sign Out</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed bottom-20 md:bottom-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-6 py-3 rounded-xl shadow-2xl opacity-0 pointer-events-none transition-all duration-300 z-[70] flex items-center gap-3">
+        <span id="toastIcon" class="material-symbols-outlined text-lg text-emerald-400">check_circle</span>
+        <span id="toastMessage" class="text-sm font-medium"></span>
+    </div>
+
+    <script>
+        const courses = [
+            { id: 'safe-prescribing', title: 'Safe Prescribing', description: 'Foundations of safe and effective prescribing practices.', published: true, students: 54, completion: 68, modules: [
+                { id: 'm1', title: 'Module 1: Principles & Foundations', order: 1, lessons: [{ id: 'l1', title: 'Day 1: Principles of Safe Prescribing', videoUrl: '', duration: 30, order: 1 }, { id: 'l2', title: 'Day 2: Pharmacokinetics & Dynamics', videoUrl: '', duration: 35, order: 2 }, { id: 'l3', title: 'Day 3: Prescription Writing', videoUrl: '', duration: 25, order: 3 }] },
+                { id: 'm2', title: 'Module 2: Drug Interactions', order: 2, lessons: [{ id: 'l4', title: 'Day 4: Common Drug Interactions', videoUrl: '', duration: 30, order: 1 }, { id: 'l5', title: 'Day 5: Adverse Drug Reactions', videoUrl: '', duration: 35, order: 2 }] },
+                { id: 'm3', title: 'Module 3: Advanced Prescribing', order: 3, lessons: [{ id: 'l7', title: 'Day 7: Evidence-Based Prescribing', videoUrl: '', duration: 30, order: 1 }] }
+            ]},
+            { id: 'clinical-therapeutics', title: 'Clinical Therapeutics', description: 'Evidence-based treatment strategies.', published: true, students: 58, completion: 82, modules: [
+                { id: 'm4', title: 'Module 1: Infectious Diseases', order: 1, lessons: [{ id: 'l10', title: 'Day 4: Antibiotic Stewardship', videoUrl: '', duration: 30, order: 1 }] },
+                { id: 'm5', title: 'Module 2: Pain Management', order: 2, lessons: [{ id: 'l13', title: 'Day 7: Acute Pain Management', videoUrl: '', duration: 30, order: 1 }] },
+                { id: 'm6', title: 'Module 3: Cardiovascular', order: 3, lessons: [{ id: 'l16', title: 'Day 10: Antihypertensives', videoUrl: '', duration: 30, order: 1 }] }
+            ]},
+            { id: 'special-populations', title: 'Special Populations', description: 'Pharmacology for pediatric, geriatric, and pregnant patients.', published: true, students: 54, completion: 52, modules: [
+                { id: 'm7', title: 'Module 1: Pediatrics', order: 1, lessons: [{ id: 'l19', title: 'Day 7: Pediatric Dosing', videoUrl: '', duration: 30, order: 1 }] },
+                { id: 'm8', title: 'Module 2: Geriatrics', order: 2, lessons: [{ id: 'l22', title: 'Day 10: Geriatric Pharmacokinetics', videoUrl: '', duration: 30, order: 1 }] },
+                { id: 'm9', title: 'Module 3: Pregnancy', order: 3, lessons: [{ id: 'l25', title: 'Day 13: Pregnancy Categories', videoUrl: '', duration: 30, order: 1 }] }
+            ]},
+            { id: 'iv-therapy', title: 'IV Therapy & Safety', description: 'Intravenous therapy protocols and safety.', published: false, students: 0, completion: 0, modules: [
+                { id: 'm10', title: 'Module 1: IV Fundamentals', order: 1, lessons: [] },
+                { id: 'm11', title: 'Module 2: IV Medications', order: 2, lessons: [] },
+                { id: 'm12', title: 'Module 3: IV Safety', order: 3, lessons: [] }
+            ]}
+        ];
+
+        let editingCourseIndex = -1;
+        let editingModuleIndex = -1;
+        let editingLessonIndex = -1;
+
+        function checkSession() {
+            const session = sessionStorage.getItem('pz_admin_session');
+            if (!session) { showSessionExpired(); return null; }
+            const data = JSON.parse(session);
+            if (Date.now() > data.expiresAt) { sessionStorage.removeItem('pz_admin_session'); showSessionExpired(); return null; }
+            return data;
+        }
+        function showSessionExpired() { document.getElementById('sessionExpiredModal').classList.remove('hidden'); document.getElementById('sessionExpiredModal').classList.add('flex'); }
+        function populateAdminInfo(admin) {
+            const initials = admin.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+            const topAvatar = document.getElementById('topAvatar');
+            if (topAvatar) topAvatar.textContent = initials;
+        }
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('-translate-x-full'); document.getElementById('sidebarOverlay').classList.toggle('hidden'); }
+        function handleLogout() { sessionStorage.removeItem('pz_admin_session'); window.location.href = 'admin-login.html'; }
+        function showLogoutModal() { document.getElementById('logoutModal').classList.remove('hidden'); document.getElementById('logoutModal').classList.add('flex'); }
+        function closeLogoutModal() { document.getElementById('logoutModal').classList.add('hidden'); document.getElementById('logoutModal').classList.remove('flex'); }
+        function confirmLogout() { closeLogoutModal(); setTimeout(() => { sessionStorage.removeItem('pz_admin_session'); window.location.href = 'admin-login.html'; }, 300); }
+
+        function switchTab(tab) {
+            ['courses', 'modules', 'lessons'].forEach(t => {
+                document.getElementById(`content-${t}`).classList.toggle('hidden', t !== tab);
+                const btn = document.getElementById(`tab-${t}`);
+                if (t === tab) { btn.classList.add('active', 'text-primary', 'border-primary', 'font-bold'); btn.classList.remove('text-on-surface-variant', 'font-medium'); }
+                else { btn.classList.remove('active', 'text-primary', 'border-primary', 'font-bold'); btn.classList.add('text-on-surface-variant', 'font-medium'); }
+            });
+        }
+
+        function openCourseModal(index = -1) {
+            editingCourseIndex = index;
+            document.getElementById('courseModalTitle').textContent = index >= 0 ? 'Edit Course' : 'New Course';
+            if (index >= 0) {
+                document.getElementById('courseTitle').value = courses[index].title;
+                document.getElementById('courseDescription').value = courses[index].description;
+                document.getElementById('coursePublished').checked = courses[index].published;
+            } else {
+                document.getElementById('courseTitle').value = '';
+                document.getElementById('courseDescription').value = '';
+                document.getElementById('coursePublished').checked = false;
+            }
+            document.getElementById('courseModal').classList.remove('hidden');
+            document.getElementById('courseModal').classList.add('flex');
+        }
+        function closeCourseModal() { document.getElementById('courseModal').classList.add('hidden'); document.getElementById('courseModal').classList.remove('flex'); }
+        function saveCourse() {
+            const title = document.getElementById('courseTitle').value.trim();
+            if (!title) { showToast('Please enter a course title', 'error'); return; }
+            if (editingCourseIndex >= 0) {
+                courses[editingCourseIndex].title = title;
+                courses[editingCourseIndex].description = document.getElementById('courseDescription').value.trim();
+                courses[editingCourseIndex].published = document.getElementById('coursePublished').checked;
+            } else {
+                courses.push({ id: 'course-' + Date.now(), title, description: document.getElementById('courseDescription').value.trim(), published: document.getElementById('coursePublished').checked, students: 0, completion: 0, modules: [] });
+            }
+            closeCourseModal();
+            showToast(editingCourseIndex >= 0 ? 'Course updated' : 'Course created', 'success');
+        }
+        function editCourse(index) { openCourseModal(index); }
+        function toggleCourseStatus(index) { courses[index].published = !courses[index].published; showToast(courses[index].published ? 'Course published' : 'Course unpublished', 'success'); }
+        function viewCourseModules(index) { switchTab('modules'); document.getElementById('moduleCourseSelect').value = String(index); loadModules(); }
+
+        function openModuleModal(index = -1) {
+            editingModuleIndex = index;
+            const courseIdx = parseInt(document.getElementById('moduleCourseSelect').value);
+            document.getElementById('moduleModalTitle').textContent = index >= 0 ? 'Edit Module' : 'New Module';
+            if (index >= 0) {
+                document.getElementById('moduleTitle').value = courses[courseIdx].modules[index].title;
+                document.getElementById('moduleOrder').value = courses[courseIdx].modules[index].order;
+            } else {
+                document.getElementById('moduleTitle').value = '';
+                document.getElementById('moduleOrder').value = courses[courseIdx].modules.length + 1;
+            }
+            document.getElementById('moduleModal').classList.remove('hidden');
+            document.getElementById('moduleModal').classList.add('flex');
+        }
+        function closeModuleModal() { document.getElementById('moduleModal').classList.add('hidden'); document.getElementById('moduleModal').classList.remove('flex'); }
+        function saveModule() {
+            const title = document.getElementById('moduleTitle').value.trim();
+            if (!title) { showToast('Please enter a module title', 'error'); return; }
+            const courseIdx = parseInt(document.getElementById('moduleCourseSelect').value);
+            if (isNaN(courseIdx)) return;
+            const order = parseInt(document.getElementById('moduleOrder').value);
+            if (editingModuleIndex >= 0) { courses[courseIdx].modules[editingModuleIndex].title = title; courses[courseIdx].modules[editingModuleIndex].order = order; }
+            else { courses[courseIdx].modules.push({ id: 'm-' + Date.now(), title, order, lessons: [] }); }
+            closeModuleModal(); loadModules();
+            showToast(editingModuleIndex >= 0 ? 'Module updated' : 'Module created', 'success');
+        }
+        function loadModules() {
+            const courseIdx = parseInt(document.getElementById('moduleCourseSelect').value);
+            const container = document.getElementById('modulesList');
+            if (isNaN(courseIdx) || !courses[courseIdx]) { container.innerHTML = '<div class="bg-surface-container-lowest rounded-xl clinical-shadow border border-outline-variant/10 p-8 text-center text-on-surface-variant text-sm">Select a course to view its modules</div>'; return; }
+            container.innerHTML = courses[courseIdx].modules.map((mod, i) => `
+                <div class="bg-surface-container-lowest rounded-xl clinical-shadow border border-outline-variant/10 p-4 animate-fadeIn">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex items-center gap-3">
+                            <span class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-xs font-display font-bold text-primary flex-shrink-0">${mod.order}</span>
+                            <div><h4 class="text-sm font-bold text-on-surface">${mod.title}</h4><p class="text-[10px] text-on-surface-variant">${mod.lessons.length} lessons</p></div>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button onclick="openModuleModal(${i})" class="p-1.5 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-lg">edit</span></button>
+                            <button onclick="deleteModule(${i})" class="p-1.5 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-error transition-colors"><span class="material-symbols-outlined text-lg">delete</span></button>
+                        </div>
+                    </div>
+                    ${mod.lessons.length > 0 ? `<div class="ml-11 space-y-1">${mod.lessons.map(l => `<div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-surface-container text-xs"><span class="material-symbols-outlined text-sm text-on-surface-variant">play_circle</span><span class="text-on-surface-variant flex-1 truncate">${l.title}</span><span class="text-on-surface-variant/60">${l.duration} min</span></div>`).join('')}</div>` : '<p class="ml-11 text-[10px] text-on-surface-variant/40">No lessons yet</p>'}
+                </div>
+            `).join('');
+        }
+        function deleteModule(index) { const courseIdx = parseInt(document.getElementById('moduleCourseSelect').value); courses[courseIdx].modules.splice(index, 1); loadModules(); showToast('Module deleted', 'success'); }
+
+        function openLessonModal(index = -1) {
+            editingLessonIndex = index;
+            const courseIdx = parseInt(document.getElementById('lessonCourseSelect').value);
+            const modIdx = parseInt(document.getElementById('lessonModuleSelect').value);
+            document.getElementById('lessonModalTitle').textContent = index >= 0 ? 'Edit Lesson' : 'New Lesson';
+            if (index >= 0) {
+                const lesson = courses[courseIdx].modules[modIdx].lessons[index];
+                document.getElementById('lessonTitle').value = lesson.title;
+                document.getElementById('lessonVideoUrl').value = lesson.videoUrl;
+                document.getElementById('lessonDuration').value = lesson.duration;
+            } else {
+                document.getElementById('lessonTitle').value = '';
+                document.getElementById('lessonVideoUrl').value = '';
+                document.getElementById('lessonDuration').value = 30;
+            }
+            document.getElementById('lessonModal').classList.remove('hidden');
+            document.getElementById('lessonModal').classList.add('flex');
+        }
+        function closeLessonModal() { document.getElementById('lessonModal').classList.add('hidden'); document.getElementById('lessonModal').classList.remove('flex'); }
+        function saveLesson() {
+            const title = document.getElementById('lessonTitle').value.trim();
+            if (!title) { showToast('Please enter a lesson title', 'error'); return; }
+            const courseIdx = parseInt(document.getElementById('lessonCourseSelect').value);
+            const modIdx = parseInt(document.getElementById('lessonModuleSelect').value);
+            const videoUrl = document.getElementById('lessonVideoUrl').value.trim();
+            const duration = parseInt(document.getElementById('lessonDuration').value);
+            if (editingLessonIndex >= 0) {
+                const lesson = courses[courseIdx].modules[modIdx].lessons[editingLessonIndex];
+                lesson.title = title; lesson.videoUrl = videoUrl; lesson.duration = duration;
+            } else {
+                courses[courseIdx].modules[modIdx].lessons.push({ id: 'l-' + Date.now(), title, videoUrl, duration, order: courses[courseIdx].modules[modIdx].lessons.length + 1 });
+            }
+            closeLessonModal(); loadLessons();
+            showToast(editingLessonIndex >= 0 ? 'Lesson updated' : 'Lesson created', 'success');
+        }
+        function updateLessonModules() {
+            const courseIdx = parseInt(document.getElementById('lessonCourseSelect').value);
+            const moduleSelect = document.getElementById('lessonModuleSelect');
+            if (isNaN(courseIdx) || !courses[courseIdx]) { moduleSelect.innerHTML = '<option value="">Select course first</option>'; moduleSelect.disabled = true; return; }
+            moduleSelect.disabled = false;
+            moduleSelect.innerHTML = '<option value="">Choose a module...</option>';
+            courses[courseIdx].modules.forEach((mod, i) => { const option = document.createElement('option'); option.value = i; option.textContent = mod.title; moduleSelect.appendChild(option); });
+            moduleSelect.onchange = loadLessons;
+            document.getElementById('lessonsList').innerHTML = '<div class="bg-surface-container-lowest rounded-xl clinical-shadow border border-outline-variant/10 p-8 text-center text-on-surface-variant text-sm">Select a module to view lessons</div>';
+        }
+        function loadLessons() {
+            const courseIdx = parseInt(document.getElementById('lessonCourseSelect').value);
+            const modIdx = parseInt(document.getElementById('lessonModuleSelect').value);
+            const container = document.getElementById('lessonsList');
+            if (isNaN(courseIdx) || isNaN(modIdx) || !courses[courseIdx] || !courses[courseIdx].modules[modIdx]) { container.innerHTML = '<div class="bg-surface-container-lowest rounded-xl clinical-shadow border border-outline-variant/10 p-8 text-center text-on-surface-variant text-sm">Select a course and module to view lessons</div>'; return; }
+            const lessons = courses[courseIdx].modules[modIdx].lessons;
+            container.innerHTML = lessons.length > 0 ? lessons.map((l, i) => `
+                <div class="bg-surface-container-lowest rounded-xl clinical-shadow border border-outline-variant/10 p-4 animate-fadeIn lesson-row">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3 flex-1 min-w-0">
+                            <span class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-xs font-display font-bold text-blue-600 flex-shrink-0">${l.order}</span>
+                            <div class="min-w-0">
+                                <h4 class="text-sm font-bold text-on-surface truncate">${l.title}</h4>
+                                <div class="flex items-center gap-3 text-[10px] text-on-surface-variant mt-0.5">
+                                    <span class="flex items-center gap-1"><span class="material-symbols-outlined text-xs">schedule</span> ${l.duration} min</span>
+                                    ${l.videoUrl ? '<span class="flex items-center gap-1"><span class="material-symbols-outlined text-xs">play_circle</span> Video added</span>' : '<span class="text-amber-600/60">No video</span>'}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1 ml-3 flex-shrink-0">
+                            <button onclick="openLessonModal(${i})" class="p-1.5 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-lg">edit</span></button>
+                            <button onclick="deleteLesson(${i})" class="p-1.5 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-error transition-colors"><span class="material-symbols-outlined text-lg">delete</span></button>
+                        </div>
+                    </div>
+                </div>
+            `).join('') : '<div class="bg-surface-container-lowest rounded-xl clinical-shadow border border-outline-variant/10 p-8 text-center text-on-surface-variant text-sm">No lessons yet. Click "Add Lesson" to create one.</div>';
+        }
+        function deleteLesson(index) { const courseIdx = parseInt(document.getElementById('lessonCourseSelect').value); const modIdx = parseInt(document.getElementById('lessonModuleSelect').value); courses[courseIdx].modules[modIdx].lessons.splice(index, 1); loadLessons(); showToast('Lesson deleted', 'success'); }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = message;
+            const icon = document.getElementById('toastIcon');
+            icon.textContent = type === 'success' ? 'check_circle' : 'error';
+            icon.className = `material-symbols-outlined text-lg ${type === 'success' ? 'text-emerald-400' : 'text-red-400'}`;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            toast.classList.add('opacity-100');
+            setTimeout(() => { toast.classList.add('opacity-0', 'pointer-events-none'); }, 3000);
+        }
+
+        const admin = checkSession();
+        if (admin) { populateAdminInfo(admin); }
+    </script>
+</body>
+</html>
