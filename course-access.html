@@ -1,0 +1,1940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Access | PZ Academy</title>
+    
+    <meta name="robots" content="noindex, nofollow">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet"/>
+    
+    <!-- YouTube Player API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAFkL2lyf8JNQsxlH795Uqg6TSXhSwJ8r4",
+            authDomain: "pharmacozyme-academy.firebaseapp.com",
+            projectId: "pharmacozyme-academy",
+            storageBucket: "pharmacozyme-academy.firebasestorage.app",
+            messagingSenderId: "894865466932",
+            appId: "1:894865466932:web:5d05d17cd88eebfcbb0c61"
+        };
+        
+        // Initialize Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
+        
+        // Get current user ID
+        function getUserId() {
+            return localStorage.getItem('pz_user_id') || 'demo_user';
+        }
+        
+        // Firebase Functions
+        async function saveProgressToFirebase(courseId, lessonId) {
+            try {
+                const userId = getUserId();
+                const progressRef = db.collection('progress').doc(`${userId}_${courseId}`);
+                await progressRef.set({
+                    completedLessons: firebase.firestore.FieldValue.arrayUnion(lessonId),
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+                console.log('Progress saved to Firebase');
+            } catch (error) {
+                console.error('Error saving progress:', error);
+            }
+        }
+        
+        async function saveQuizAttemptToFirebase(courseId, attemptData) {
+            try {
+                const userId = getUserId();
+                const attemptsRef = db.collection('quizAttempts').doc(`${userId}_${courseId}`);
+                
+                await attemptsRef.set({
+                    attempts: firebase.firestore.FieldValue.arrayUnion({
+                        ...attemptData,
+                        completedAt: new Date().toISOString()
+                    }),
+                    bestScore: firebase.firestore.FieldValue.increment(0), // Will be calculated on read
+                    attemptsUsed: firebase.firestore.FieldValue.increment(1),
+                    lastAttempt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+                console.log('Quiz attempt saved to Firebase');
+            } catch (error) {
+                console.error('Error saving quiz attempt:', error);
+            }
+        }
+        
+        async function trackDownloadToFirebase(courseId, resourceId, filename) {
+            try {
+                const userId = getUserId();
+                const progressRef = db.collection('progress').doc(`${userId}_${courseId}`);
+                await progressRef.set({
+                    downloadedResources: firebase.firestore.FieldValue.arrayUnion({
+                        resourceId,
+                        filename,
+                        downloadedAt: new Date().toISOString()
+                    })
+                }, { merge: true });
+                console.log('Download tracked in Firebase');
+            } catch (error) {
+                console.error('Error tracking download:', error);
+            }
+        }
+        
+        async function updateProgressPercentToFirebase(courseId, percentage) {
+            try {
+                const userId = getUserId();
+                const progressRef = db.collection('progress').doc(`${userId}_${courseId}`);
+                await progressRef.set({
+                    progressPercentage: percentage,
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+            } catch (error) {
+                console.error('Error updating progress:', error);
+            }
+        }
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#005539',
+                        'primary-container': '#04704d',
+                        'primary-fixed': '#9cf5c8',
+                        'secondary': '#006d37',
+                        'secondary-container': '#6bfe9c',
+                        'surface': '#f8f9fa',
+                        'surface-container-low': '#f3f4f5',
+                        'surface-container': '#edeeef',
+                        'surface-container-high': '#e7e8e9',
+                        'surface-container-highest': '#e1e3e4',
+                        'surface-container-lowest': '#ffffff',
+                        'surface-variant': '#e1e3e4',
+                        'surface-bright': '#f8f9fa',
+                        'surface-dim': '#d9dadb',
+                        'on-primary': '#ffffff',
+                        'on-primary-container': '#97f0c4',
+                        'on-secondary': '#ffffff',
+                        'on-secondary-container': '#00743a',
+                        'on-surface': '#191c1d',
+                        'on-surface-variant': '#3f4943',
+                        'on-background': '#191c1d',
+                        'background': '#f8f9fa',
+                        'outline': '#6f7a72',
+                        'outline-variant': '#bec9c1',
+                        'error': '#ba1a1a',
+                        'error-container': '#ffdad6',
+                        'on-error': '#ffffff',
+                        'on-error-container': '#93000a',
+                        'tertiary': '#7c3230',
+                        'tertiary-container': '#9a4946',
+                        'inverse-surface': '#2e3132',
+                        'inverse-primary': '#80d8ad',
+                        'inverse-on-surface': '#f0f1f2',
+                        'surface-tint': '#006c4a'
+                    },
+                    fontFamily: {
+                        'headline': ['Public Sans', 'sans-serif'],
+                        'body': ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f3f4f5;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #bec9c1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6f7a72;
+        }
+        
+        /* Video player overlay */
+        .video-overlay {
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0) 100%);
+        }
+        
+        /* Quiz option animations */
+        .quiz-option {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .quiz-option:hover:not(.disabled):not(.answered) {
+            transform: scale(1.03) translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        .quiz-option.selected {
+            transform: scale(1.05);
+        }
+        
+        /* Correct answer animation */
+        .quiz-option.correct {
+            animation: correctPulse 0.6s ease-out !important;
+        }
+        .quiz-option.correct .option-progress {
+            width: 100% !important;
+            background: #22c55e !important;
+        }
+        
+        /* Incorrect answer animation */
+        .quiz-option.incorrect {
+            animation: incorrectShake 0.5s ease-out !important;
+        }
+        .quiz-option.incorrect .option-progress {
+            background: #ef4444 !important;
+        }
+        
+        @keyframes correctPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes incorrectShake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+        
+        /* Timer animation */
+        .timer-ring {
+            transition: stroke-dashoffset 1s linear;
+        }
+        
+        /* Progress bar animation */
+        .progress-fill {
+            transition: width 0.5s ease-out;
+        }
+        
+        /* Certificate glow */
+        .certificate-glow {
+            box-shadow: 0 0 60px rgba(212, 175, 55, 0.3);
+        }
+        
+        /* Mobile bottom nav safe area */
+        .safe-area-bottom {
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        
+        /* Points animation */
+        @keyframes pointsFloat {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-50px) scale(1.5); opacity: 0; }
+        }
+        .points-float {
+            animation: pointsFloat 1s ease-out forwards;
+        }
+        
+        /* Celebration confetti */
+        @keyframes confettiFall {
+            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            animation: confettiFall 3s linear forwards;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body antialiased min-h-screen pb-20 md:pb-0">
+    
+    <!-- ==================== HEADER ==================== -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-outline-variant/10">
+        <div class="max-w-screen-2xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
+            <!-- Logo & Course Info -->
+            <div class="flex items-center gap-4">
+                <span class="text-xl font-black text-primary tracking-tight font-headline">PZ Academy</span>
+                <span class="hidden md:block text-surface-variant">|</span>
+                <div class="hidden md:block">
+                    <h1 class="text-sm font-bold text-on-surface tracking-tight" id="courseTitle">Practical Pharmacology Batch 2</h1>
+                    <p class="text-[10px] text-on-surface-variant uppercase tracking-wider">Dr. Mehwish Kanwal</p>
+                </div>
+            </div>
+            
+            <!-- Right Actions -->
+            <div class="flex items-center gap-3">
+                <!-- Progress (Desktop) -->
+                <div class="hidden md:flex items-center gap-3">
+                    <div class="w-32 h-2 bg-surface-variant rounded-full overflow-hidden">
+                        <div id="headerProgress" class="h-full bg-primary rounded-full progress-fill" style="width: 0%"></div>
+                    </div>
+                    <span id="headerProgressText" class="text-xs font-bold text-primary">0%</span>
+                </div>
+                
+                <!-- Notifications -->
+                <button class="relative p-2 rounded-full hover:bg-surface-container-low transition-colors">
+                    <span class="material-symbols-outlined text-xl text-on-surface-variant">notifications</span>
+                    <span class="absolute top-1 right-1 w-2 h-2 bg-error rounded-full"></span>
+                </button>
+                
+                <!-- Profile -->
+                <button class="flex items-center gap-2 p-1 rounded-full hover:bg-surface-container-low transition-colors">
+                    <div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-white text-sm font-bold">
+                        AK
+                    </div>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- ==================== MOBILE ANALYTICS HEADER ==================== -->
+    <div id="mobileAnalytics" class="md:hidden bg-surface-container-lowest border-b border-outline-variant/10">
+        <button onclick="toggleMobileAnalytics()" class="w-full px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">insights</span>
+                </div>
+                <div class="text-left">
+                    <span class="block text-sm font-bold text-on-surface">Your Progress</span>
+                    <span class="block text-xs text-on-surface-variant"><span id="mobileAnalyticsPercent">15%</span> Complete</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl font-black text-primary" id="mobileQuickStats">2 Videos • 1 Quiz • 75%</span>
+                </div>
+                <span id="analyticsToggle" class="material-symbols-outlined text-on-surface-variant transition-transform">expand_more</span>
+            </div>
+        </button>
+        
+        <!-- Expanded Content -->
+        <div id="mobileAnalyticsContent" class="hidden px-4 pb-4 space-y-3">
+            <!-- Quick Stats -->
+            <div class="bg-white rounded-xl p-4">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="relative w-20 h-20">
+                        <svg class="w-20 h-20 transform -rotate-90">
+                            <circle class="text-surface-variant" cx="40" cy="40" r="36" fill="transparent" stroke="currentColor" stroke-width="4"></circle>
+                            <circle id="mobileAnalyticsProgressRing" class="text-primary" cx="40" cy="40" r="36" fill="transparent" stroke="currentColor" stroke-width="4" stroke-dasharray="226.19" stroke-dashoffset="226.19" stroke-linecap="round"></circle>
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <span id="mobileAnalyticsPercentRing" class="text-xl font-black text-primary">15%</span>
+                        </div>
+                    </div>
+                    <div class="flex-1 grid grid-cols-2 gap-2">
+                        <div class="bg-surface-container-low rounded-lg p-2 text-center">
+                            <span id="mobileVideosWatched" class="block text-lg font-bold text-primary">2</span>
+                            <span class="text-[9px] text-on-surface-variant uppercase">Videos</span>
+                        </div>
+                        <div class="bg-surface-container-low rounded-lg p-2 text-center">
+                            <span id="mobileQuizzesPassed" class="block text-lg font-bold text-secondary">1</span>
+                            <span class="text-[9px] text-on-surface-variant uppercase">Quizzes</span>
+                        </div>
+                        <div class="bg-surface-container-low rounded-lg p-2 text-center">
+                            <span id="mobileAvgScore" class="block text-lg font-bold text-tertiary">75%</span>
+                            <span class="text-[9px] text-on-surface-variant uppercase">Avg</span>
+                        </div>
+                        <div class="bg-surface-container-low rounded-lg p-2 text-center">
+                            <span id="mobileTimeSpent" class="block text-lg font-bold text-on-surface-variant">4h</span>
+                            <span class="text-[9px] text-on-surface-variant uppercase">Time</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Streak -->
+            <div class="bg-gradient-to-r from-amber-400 to-amber-600 rounded-xl p-4 text-white">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+                    <div>
+                        <span id="mobileStreak" class="text-xl font-black">3</span>
+                        <span class="text-sm font-medium ml-1">Day Streak</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Leaderboard -->
+            <div class="bg-white rounded-xl p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-sm font-bold text-on-surface">Top Learners</span>
+                    <span class="material-symbols-outlined text-primary text-lg">leaderboard</span>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex items-center gap-2">
+                        <span class="w-5 h-5 bg-amber-400 text-white text-[10px] font-bold rounded-full flex items-center justify-center">1</span>
+                        <div class="w-6 h-6 bg-primary-container rounded-full flex items-center justify-center text-white text-[9px] font-bold">AK</div>
+                        <span class="flex-1 text-xs font-medium text-on-surface truncate">Dr. Ahmed Khan</span>
+                        <span class="text-xs text-on-surface-variant">92%</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-5 h-5 bg-gray-300 text-gray-700 text-[10px] font-bold rounded-full flex items-center justify-center">2</span>
+                        <div class="w-6 h-6 bg-secondary-container rounded-full flex items-center justify-center text-white text-[9px] font-bold">SA</div>
+                        <span class="flex-1 text-xs font-medium text-on-surface truncate">Dr. Sarah Ali</span>
+                        <span class="text-xs text-on-surface-variant">88%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <main class="pt-16 md:pt-16">
+        <div class="max-w-screen-2xl mx-auto px-4 md:px-8 py-6">
+            <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
+                
+                <!-- ==================== LEFT SIDEBAR: STUDENT ANALYTICS (Desktop) ==================== -->
+                <div class="hidden xl:block space-y-6">
+                    
+                    <!-- Quick Stats -->
+                    <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/10 p-6">
+                        <h3 class="text-lg font-bold text-on-surface mb-4">Your Progress</h3>
+                        
+                        <!-- Overall Progress Ring -->
+                        <div class="flex items-center justify-center mb-6">
+                            <div class="relative w-32 h-32">
+                                <svg class="w-32 h-32 transform -rotate-90">
+                                    <circle class="text-surface-variant" cx="64" cy="64" r="56" fill="transparent" stroke="currentColor" stroke-width="8"></circle>
+                                    <circle id="analyticsProgressRing" class="text-primary" cx="64" cy="64" r="56" fill="transparent" stroke="currentColor" stroke-width="8" stroke-dasharray="351.86" stroke-dashoffset="351.86" stroke-linecap="round"></circle>
+                                </svg>
+                                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                    <span id="analyticsProgressPercent" class="text-3xl font-black text-primary">15%</span>
+                                    <span class="text-[10px] text-on-surface-variant uppercase tracking-wider">Complete</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Stats Grid -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-surface-container-low rounded-xl p-3 text-center">
+                                <span id="analyticsVideosWatched" class="block text-2xl font-bold text-primary">2</span>
+                                <span class="text-[10px] text-on-surface-variant uppercase">Videos</span>
+                            </div>
+                            <div class="bg-surface-container-low rounded-xl p-3 text-center">
+                                <span id="analyticsQuizzesPassed" class="block text-2xl font-bold text-secondary">1</span>
+                                <span class="text-[10px] text-on-surface-variant uppercase">Quizzes</span>
+                            </div>
+                            <div class="bg-surface-container-low rounded-xl p-3 text-center">
+                                <span id="analyticsAvgScore" class="block text-2xl font-bold text-tertiary">75%</span>
+                                <span class="text-[10px] text-on-surface-variant uppercase">Avg Score</span>
+                            </div>
+                            <div class="bg-surface-container-low rounded-xl p-3 text-center">
+                                <span id="analyticsTimeSpent" class="block text-2xl font-bold text-on-surface-variant">4h</span>
+                                <span class="text-[10px] text-on-surface-variant uppercase">Time</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Current Streak -->
+                    <div class="bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl p-6 text-white">
+                        <div class="flex items-center gap-3 mb-3">
+                            <span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+                            <div>
+                                <span id="currentStreak" class="text-2xl font-black">3</span>
+                                <span class="text-sm font-medium ml-1">Day Streak</span>
+                            </div>
+                        </div>
+                        <p class="text-sm text-white/80">Keep it up! Complete today's lesson to extend your streak.</p>
+                    </div>
+                    
+                    <!-- Recent Activity -->
+                    <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/10 p-6">
+                        <h3 class="text-lg font-bold text-on-surface mb-4">Recent Activity</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-start gap-3">
+                                <div class="w-8 h-8 bg-secondary-container/30 rounded-full flex items-center justify-center shrink-0">
+                                    <span class="material-symbols-outlined text-sm text-secondary">check_circle</span>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-on-surface">Day 1 Quiz Passed</p>
+                                    <p class="text-xs text-on-surface-variant">Score: 85% • 2 hours ago</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <div class="w-8 h-8 bg-primary-container/30 rounded-full flex items-center justify-center shrink-0">
+                                    <span class="material-symbols-outlined text-sm text-primary">play_circle</span>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-on-surface">Module 1 Video Watched</p>
+                                    <p class="text-xs text-on-surface-variant">Duration: 45 min • Yesterday</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <div class="w-8 h-8 bg-surface-container rounded-full flex items-center justify-center shrink-0">
+                                    <span class="material-symbols-outlined text-sm text-on-surface-variant">emoji_events</span>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-on-surface">Course Started</p>
+                                    <p class="text-xs text-on-surface-variant">3 days ago</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Leaderboard Preview -->
+                    <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/10 p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-bold text-on-surface">Top Learners</h3>
+                            <span class="material-symbols-outlined text-primary">leaderboard</span>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3">
+                                <span class="w-6 h-6 bg-amber-400 text-white text-xs font-bold rounded-full flex items-center justify-center">1</span>
+                                <div class="w-8 h-8 bg-primary-container rounded-full flex items-center justify-center text-white text-xs font-bold">AK</div>
+                                <span class="flex-1 text-sm font-medium text-on-surface truncate">Dr. Ahmed Khan</span>
+                                <span class="text-xs text-on-surface-variant">92%</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="w-6 h-6 bg-gray-300 text-gray-700 text-xs font-bold rounded-full flex items-center justify-center">2</span>
+                                <div class="w-8 h-8 bg-secondary-container rounded-full flex items-center justify-center text-white text-xs font-bold">SA</div>
+                                <span class="flex-1 text-sm font-medium text-on-surface truncate">Dr. Sarah Ali</span>
+                                <span class="text-xs text-on-surface-variant">88%</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="w-6 h-6 bg-amber-700 text-white text-xs font-bold rounded-full flex items-center justify-center">3</span>
+                                <div class="w-8 h-8 bg-tertiary-container rounded-full flex items-center justify-center text-white text-xs font-bold">MK</div>
+                                <span class="flex-1 text-sm font-medium text-on-surface truncate">Dr. Muhammad K.</span>
+                                <span class="text-xs text-on-surface-variant">85%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ==================== LEFT COLUMN (Video + Info + Quiz) ==================== -->
+                <div class="lg:col-span-2 space-y-6">
+                    
+                    <!-- Video Player -->
+                    <section class="relative aspect-video bg-black rounded-xl overflow-hidden shadow-xl" id="videoSection">
+                        <!-- YouTube Player Container -->
+                        <div id="youtubePlayer"></div>
+                        
+                        <!-- Thumbnail Overlay (shown before play) -->
+                        <div id="videoOverlay" class="absolute inset-0 video-overlay flex flex-col items-center justify-center cursor-pointer" onclick="playVideo()">
+                            <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1280&q=80');"></div>
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                            <button class="relative z-10 w-20 h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border-2 border-white/40 hover:bg-white/30 hover:scale-110 transition-all">
+                                <span class="material-symbols-outlined text-5xl text-white" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Current Lesson Info -->
+                        <div class="absolute bottom-0 left-0 right-0 p-4 md:p-6">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="bg-secondary-container/90 text-on-secondary-container px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">Current Session</span>
+                            </div>
+                            <h2 id="currentLessonTitle" class="text-lg md:text-2xl font-bold text-white tracking-tight">Module 01, Day 02: Pharmacokinetics</h2>
+                        </div>
+                    </section>
+                    
+                    <!-- Lesson Tabs (Desktop) -->
+                    <section class="hidden md:block bg-surface-container-lowest rounded-xl p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-bold text-on-surface" id="lessonTabTitle">Pharmacokinetics Fundamentals</h3>
+                            <button id="markCompleteBtn" onclick="markLessonComplete()" class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all opacity-50 cursor-not-allowed" style="background: #6f7a72; color: white;">
+                                <span class="material-symbols-outlined text-lg">lock</span>
+                                <span id="markCompleteText">Watch Video & Pass Quiz</span>
+                            </button>
+                        </div>
+                        <p id="lessonTabDescription" class="text-on-surface-variant text-sm leading-relaxed">
+                            This comprehensive session covers the four fundamental processes of pharmacokinetics: Absorption, Distribution, Metabolism, and Excretion (ADME). Understanding these processes is essential for safe and effective medication dosing.
+                        </p>
+                        <div id="completionRequirements" class="mt-4 p-3 bg-surface-container-low rounded-lg">
+                            <p class="text-xs text-on-surface-variant font-medium mb-2">Complete these to unlock Mark Complete:</p>
+                            <div class="flex flex-wrap gap-3">
+                                <div id="reqVideo" class="flex items-center gap-2 text-xs text-on-surface-variant">
+                                    <span class="w-5 h-5 rounded-full border-2 border-surface-variant flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-sm">play_circle</span>
+                                    </span>
+                                    <span>Watch video</span>
+                                </div>
+                                <div id="reqQuiz" class="flex items-center gap-2 text-xs text-on-surface-variant">
+                                    <span class="w-5 h-5 rounded-full border-2 border-surface-variant flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-sm">quiz</span>
+                                    </span>
+                                    <span>Pass quiz (60%+)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <!-- Quiz Section -->
+                    <section class="bg-gradient-to-br from-primary to-primary-container rounded-2xl p-6 md:p-8 text-white relative overflow-hidden">
+                        <!-- Background decoration -->
+                        <div class="absolute -right-12 -top-12 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+                        
+                        <div class="relative z-10">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="bg-white/20 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider" id="quizBadge">Module 1 Quiz</span>
+                                        <span id="quizStatusBadge" class="bg-secondary px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider hidden">Passed</span>
+                                    </div>
+                                    <h3 id="quizTitle" class="text-xl md:text-2xl font-extrabold tracking-tight">Clinical Pharmacokinetics Quiz</h3>
+                                    <p id="quizDescription" class="text-on-primary-container/80 text-sm mt-2 max-w-md">Test your understanding of today's clinical lecture. Score 60% or higher to unlock your badge.</p>
+                                </div>
+                                
+                                <div class="flex flex-col items-center gap-4">
+                                    <!-- Score Card -->
+                                    <div class="bg-white/10 backdrop-blur-md px-6 py-4 rounded-xl border border-white/20 text-center min-w-[120px]">
+                                        <p class="text-[10px] uppercase tracking-widest text-primary-fixed mb-1">Best Score</p>
+                                        <span id="bestScore" class="text-4xl font-black">--</span>
+                                    </div>
+                                    
+                                    <!-- Attempts Left -->
+                                    <div class="text-center">
+                                        <p class="text-[10px] uppercase tracking-widest text-primary-fixed/70">Attempts Left</p>
+                                        <p id="attemptsLeft" class="text-lg font-bold">3 / 3</p>
+                                    </div>
+                                    
+                                    <!-- Start Button -->
+                                    <button onclick="startQuiz()" id="startQuizBtn" class="w-full md:w-auto bg-white text-primary px-8 py-3 rounded-lg font-bold text-sm hover:bg-primary-fixed transition-all shadow-lg active:scale-95">
+                                        Start Quiz
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <!-- Previous Lesson Quiz Results (if any) -->
+                    <section id="previousQuizResults" class="hidden bg-surface-container-lowest rounded-2xl border border-outline-variant/10 p-6">
+                        <h3 class="text-lg font-bold text-on-surface mb-4">Previous Quiz Results</h3>
+                        <div id="quizHistoryList" class="space-y-3">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </section>
+                    
+                    <!-- Certificate Section (shown when earned) -->
+                    <section id="certificateSection" class="hidden bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/10">
+                        <div class="flex flex-col md:flex-row items-center gap-6">
+                            <div class="w-20 h-20 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl flex items-center justify-center shadow-lg certificate-glow">
+                                <span class="material-symbols-outlined text-5xl text-white" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+                            </div>
+                            <div class="flex-1 text-center md:text-left">
+                                <h3 class="text-xl font-bold text-on-surface">Congratulations!</h3>
+                                <p class="text-on-surface-variant text-sm mt-1">You've completed all modules and passed the quiz. Your certificate is ready.</p>
+                            </div>
+                            <button onclick="downloadCertificate()" class="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-bold text-sm shadow-lg hover:shadow-xl transition-all">
+                                <span class="material-symbols-outlined">download</span>
+                                Download Certificate
+                            </button>
+                        </div>
+                    </section>
+                </div>
+                
+                <!-- ==================== RIGHT COLUMN (Curriculum + Resources) ==================== -->
+                <div class="space-y-6">
+                    
+                    <!-- Progress Card (Mobile) -->
+                    <div class="md:hidden bg-surface-container-lowest rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-semibold text-on-surface-variant">Course Progress</span>
+                            <span id="mobileProgressText" class="text-xs font-bold text-primary">0%</span>
+                        </div>
+                        <div class="h-2 bg-surface-variant rounded-full overflow-hidden">
+                            <div id="mobileProgress" class="h-full bg-primary rounded-full progress-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Curriculum -->
+                    <section id="curriculum" class="bg-surface-container-lowest rounded-2xl border border-outline-variant/10 overflow-hidden">
+                        <div class="p-4 md:p-6 border-b border-outline-variant/10">
+                            <h3 class="text-lg font-bold text-on-surface">Course Curriculum</h3>
+                            <p class="text-xs text-on-surface-variant mt-1">4 Modules • 12 Days Intensive</p>
+                        </div>
+                        
+                        <div class="p-2 space-y-1" id="curriculumContainer">
+                            <!-- Module 1 -->
+                            <div class="module-item rounded-xl overflow-hidden" data-module="1">
+                                <button onclick="toggleModule(1)" class="w-full flex items-center justify-between p-4 bg-emerald-50 text-emerald-900 transition-all">
+                                    <div class="flex items-center gap-3">
+                                        <span class="material-symbols-outlined text-xl text-primary" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+                                        <div class="text-left">
+                                            <span class="block font-bold text-sm">Module 1: Safe Prescribing</span>
+                                            <span class="block text-[10px] text-emerald-700/70 uppercase">Days 1-3 • 3 Sessions</span>
+                                        </div>
+                                    </div>
+                                    <span class="material-symbols-outlined module-arrow transition-transform">expand_more</span>
+                                </button>
+                                <div class="module-lessons hidden bg-white/50">
+                                    <!-- Day 1 - Completed with Quiz -->
+                                    <div class="flex items-center gap-3 p-4 text-xs font-medium text-on-surface-variant border-b border-emerald-900/10 hover:bg-emerald-50/50 transition-colors cursor-pointer" onclick="selectLesson(1, 1)">
+                                        <span class="material-symbols-outlined text-base text-secondary">check_circle</span>
+                                        <div class="flex-1">
+                                            <span>Day 01: Foundations</span>
+                                            <span class="ml-2 px-1.5 py-0.5 bg-secondary/20 text-secondary text-[9px] font-bold rounded">QUIZ 85%</span>
+                                        </div>
+                                        <span class="material-symbols-outlined text-sm text-secondary">chevron_right</span>
+                                    </div>
+                                    <!-- Day 2 - Current with Quiz -->
+                                    <div class="flex items-center gap-3 p-4 text-xs font-bold text-emerald-900 bg-emerald-100 border-b border-emerald-900/10 cursor-pointer" onclick="selectLesson(1, 2)">
+                                        <span class="material-symbols-outlined text-base text-primary" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+                                        <div class="flex-1">
+                                            <span>Day 02: Pharmacokinetics</span>
+                                            <span class="ml-2 px-1.5 py-0.5 bg-primary/20 text-primary text-[9px] font-bold rounded">QUIZ</span>
+                                        </div>
+                                        <span class="material-symbols-outlined text-sm text-primary">chevron_right</span>
+                                    </div>
+                                    <!-- Day 3 - Locked with Quiz -->
+                                    <div class="flex items-center gap-3 p-4 text-xs font-medium text-on-surface-variant/60 border-b border-emerald-900/10">
+                                        <span class="material-symbols-outlined text-base">lock</span>
+                                        <div class="flex-1">
+                                            <span>Day 03: Adverse Drug Reactions</span>
+                                            <span class="ml-2 px-1.5 py-0.5 bg-surface-container text-on-surface-variant/40 text-[9px] font-bold rounded">QUIZ</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Module 2 -->
+                            <div class="module-item rounded-xl overflow-hidden" data-module="2">
+                                <button onclick="toggleModule(2)" class="w-full flex items-center justify-between p-4 text-on-surface-variant hover:bg-surface-container transition-all">
+                                    <div class="flex items-center gap-3">
+                                        <span class="material-symbols-outlined text-xl">science</span>
+                                        <div class="text-left">
+                                            <span class="block font-semibold text-sm">Module 2: Clinical Therapeutics</span>
+                                            <span class="block text-[10px] uppercase">Days 4-6 • 3 Sessions</span>
+                                        </div>
+                                    </div>
+                                    <span class="material-symbols-outlined module-arrow transition-transform">expand_more</span>
+                                </button>
+                                <div class="module-lessons hidden bg-white/30">
+                                    <div class="flex items-center gap-3 p-4 text-xs font-medium text-on-surface-variant/60 border-b border-outline-variant/10">
+                                        <span class="material-symbols-outlined text-base">lock</span>
+                                        <div class="flex-1">
+                                            <span>Day 04: Cardiovascular Medications</span>
+                                            <span class="ml-2 px-1.5 py-0.5 bg-surface-container text-on-surface-variant/40 text-[9px] font-bold rounded">QUIZ</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-3 p-4 text-xs font-medium text-on-surface-variant/60 border-b border-outline-variant/10">
+                                        <span class="material-symbols-outlined text-base">lock</span>
+                                        <div class="flex-1">
+                                            <span>Day 05: Diabetes Management</span>
+                                            <span class="ml-2 px-1.5 py-0.5 bg-surface-container text-on-surface-variant/40 text-[9px] font-bold rounded">QUIZ</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-3 p-4 text-xs font-medium text-on-surface-variant/60">
+                                        <span class="material-symbols-outlined text-base">lock</span>
+                                        <div class="flex-1">
+                                            <span>Day 06: Antibiotic Selection</span>
+                                            <span class="ml-2 px-1.5 py-0.5 bg-surface-container text-on-surface-variant/40 text-[9px] font-bold rounded">QUIZ</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Module 3 -->
+                            <div class="module-item rounded-xl overflow-hidden" data-module="3">
+                                <button onclick="toggleModule(3)" class="w-full flex items-center justify-between p-4 text-on-surface-variant hover:bg-surface-container transition-all">
+                                    <div class="flex items-center gap-3">
+                                        <span class="material-symbols-outlined text-xl">groups</span>
+                                        <div class="text-left">
+                                            <span class="block font-semibold text-sm">Module 3: Special Populations</span>
+                                            <span class="block text-[10px] uppercase">Days 7-9 • 3 Sessions</span>
+                                        </div>
+                                    </div>
+                                    <span class="material-symbols-outlined module-arrow transition-transform">expand_more</span>
+                                </button>
+                                <div class="module-lessons hidden bg-white/30">
+                                    <div class="flex items-center gap-3 p-4 text-xs font-medium text-on-surface-variant/60 border-b border-outline-variant/10">
+                                        <span class="material-symbols-outlined text-base">lock</span>
+                                        <div class="flex-1">
+                                            <span>Day 07: Pediatric Dosing</span>
+                                            <span class="ml-2 px-1.5 py-0.5 bg-surface-container text-on-surface-variant/40 text-[9px] font-bold rounded">QUIZ</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-3 p-4 text-xs font-medium text-on-surface-variant/60 border-b border-outline-variant/10">
+                                        <span class="material-symbols-outlined text-base">lock</span>
+                                        <div class="flex-1">
+                                            <span>Day 08: Geriatric Considerations</span>
+                                            <span class="ml-2 px-1.5 py-0.5 bg-surface-container text-on-surface-variant/40 text-[9px] font-bold rounded">QUIZ</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-3 p-4 text-xs font-medium text-on-surface-variant/60">
+                                        <span class="material-symbols-outlined text-base">lock</span>
+                                        <div class="flex-1">
+                                            <span>Day 09: Pregnancy & Lactation</span>
+                                            <span class="ml-2 px-1.5 py-0.5 bg-surface-container text-on-surface-variant/40 text-[9px] font-bold rounded">QUIZ</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Module 4 -->
+                            <div class="module-item rounded-xl overflow-hidden" data-module="4">
+                                <button onclick="toggleModule(4)" class="w-full flex items-center justify-between p-4 text-on-surface-variant hover:bg-surface-container transition-all">
+                                    <div class="flex items-center gap-3">
+                                        <span class="material-symbols-outlined text-xl">medication_liquid</span>
+                                        <div class="text-left">
+                                            <span class="block font-semibold text-sm">Module 4: IV Therapy & Safety</span>
+                                            <span class="block text-[10px] uppercase">Days 10-12 • 3 Sessions</span>
+                                        </div>
+                                    </div>
+                                    <span class="material-symbols-outlined module-arrow transition-transform">expand_more</span>
+                                </button>
+                                <div class="module-lessons hidden bg-white/30">
+                                    <div class="flex items-center gap-3 p-4 text-xs font-medium text-on-surface-variant/60 border-b border-outline-variant/10">
+                                        <span class="material-symbols-outlined text-base">lock</span>
+                                        <span>Day 10: IV Cannulation Basics</span>
+                                    </div>
+                                    <div class="flex items-center gap-3 p-4 text-xs font-medium text-on-surface-variant/60 border-b border-outline-variant/10">
+                                        <span class="material-symbols-outlined text-base">lock</span>
+                                        <span>Day 11: Drug Interactions</span>
+                                    </div>
+                                    <div class="flex items-center gap-3 p-4 text-xs font-medium text-on-surface-variant/60">
+                                        <span class="material-symbols-outlined text-base">lock</span>
+                                        <span>Day 12: Final Assessment</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="p-4 border-t border-outline-variant/10">
+                            <button class="w-full py-3 bg-surface-container-highest text-primary font-bold text-sm rounded-lg hover:bg-surface-variant transition-colors">
+                                Download Full Syllabus
+                            </button>
+                        </div>
+                    </section>
+                    
+                    <!-- Resources -->
+                    <section class="bg-surface-container-lowest rounded-2xl border border-outline-variant/10 overflow-hidden">
+                        <div class="p-4 md:p-6 border-b border-outline-variant/10">
+                            <h3 class="text-lg font-bold text-on-surface">Scientific Resources</h3>
+                        </div>
+                        
+                        <div class="p-4 space-y-3">
+                            <!-- Resource 1 -->
+                            <div class="resource-card group bg-surface-container-low rounded-xl p-4 border border-outline-variant/10 hover:border-primary/30 transition-all cursor-pointer" onclick="downloadResource(this, 'ADME_Infographic.pdf')">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-primary-fixed/30 rounded-lg flex items-center justify-center text-primary">
+                                            <span class="material-symbols-outlined">picture_as_pdf</span>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-semibold text-sm text-on-surface">ADME Infographic</h4>
+                                            <p class="text-xs text-on-surface-variant">Visual breakdown of pharmacokinetic processes</p>
+                                        </div>
+                                    </div>
+                                    <div class="resource-action">
+                                        <span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">download</span>
+                                    </div>
+                                </div>
+                                <div class="resource-status mt-3 hidden">
+                                    <div class="flex items-center gap-2 text-xs text-secondary">
+                                        <span class="material-symbols-outlined text-sm">check_circle</span>
+                                        <span>Downloaded</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Resource 2 -->
+                            <div class="resource-card group bg-surface-container-low rounded-xl p-4 border border-outline-variant/10 hover:border-primary/30 transition-all cursor-pointer" onclick="downloadResource(this, 'Prescription_Template.pdf')">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-secondary-container/30 rounded-lg flex items-center justify-center text-secondary">
+                                            <span class="material-symbols-outlined">description</span>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-semibold text-sm text-on-surface">Prescription Template</h4>
+                                            <p class="text-xs text-on-surface-variant">Standard clinical prescription format</p>
+                                        </div>
+                                    </div>
+                                    <div class="resource-action">
+                                        <span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">download</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Resource 3 -->
+                            <div class="resource-card group bg-surface-container-low rounded-xl p-4 border border-outline-variant/10 hover:border-primary/30 transition-all cursor-pointer" onclick="downloadResource(this, 'Dose_Calculator.xlsx')">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-tertiary-container/20 rounded-lg flex items-center justify-center text-tertiary">
+                                            <span class="material-symbols-outlined">calculate</span>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-semibold text-sm text-on-surface">Dose Calculator</h4>
+                                            <p class="text-xs text-on-surface-variant">Interactive pediatric dosage tool</p>
+                                        </div>
+                                    </div>
+                                    <div class="resource-action">
+                                        <span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">download</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- ==================== QUIZ OVERLAY (KAHOOT STYLE) ==================== -->
+    <div id="quizOverlay" class="fixed inset-0 z-[100] hidden overflow-hidden">
+        <!-- Animated Background -->
+        <div class="absolute inset-0 bg-gradient-to-br from-primary via-primary-container to-secondary opacity-95"></div>
+        
+        <!-- Decorative Elements -->
+        <div class="absolute top-20 left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl animate-pulse"></div>
+        <div class="absolute bottom-40 right-20 w-48 h-48 bg-secondary/20 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
+        <div class="absolute top-1/2 left-1/4 w-24 h-24 bg-white/5 rounded-full blur-xl animate-bounce" style="animation-duration: 3s;"></div>
+        
+        <!-- Quiz Header -->
+        <div class="relative z-10 p-4 md:p-6 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center">
+                    <span class="material-symbols-outlined text-2xl text-white">quiz</span>
+                </div>
+                <div class="text-white">
+                    <h2 class="font-bold text-lg">Knowledge Check</h2>
+                    <p class="text-white/70 text-xs">Question <span id="currentQuestionNum">1</span> of <span id="totalQuestions">20</span></p>
+                </div>
+            </div>
+            
+            <!-- Timer -->
+            <div class="relative">
+                <svg class="w-20 h-20 transform -rotate-90">
+                    <circle class="text-white/20" cx="40" cy="40" r="34" fill="transparent" stroke="currentColor" stroke-width="4"></circle>
+                    <circle id="timerRing" class="text-yellow-400 timer-ring" cx="40" cy="40" r="34" fill="transparent" stroke="currentColor" stroke-dasharray="213.6" stroke-dashoffset="0" stroke-width="4"></circle>
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                    <span id="timerText" class="text-3xl font-black text-white">30</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Points Display -->
+        <div class="relative z-10 px-4 md:px-6 mb-4">
+            <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md px-4 py-2 rounded-full">
+                <span class="material-symbols-outlined text-yellow-400">stars</span>
+                <span class="text-white font-bold"><span id="totalPoints">0</span> pts</span>
+            </div>
+        </div>
+        
+        <!-- Question -->
+        <div class="relative z-10 px-4 md:px-8 mb-6">
+            <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 md:p-6">
+                <h2 id="questionText" class="text-xl md:text-3xl font-bold text-white leading-relaxed text-center">
+                    What is the primary site of drug metabolism for lipophilic compounds?
+                </h2>
+            </div>
+        </div>
+        
+        <!-- Options (Kahoot Style - Colorful Grid) -->
+        <div class="relative z-10 px-4 md:px-8 grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 max-w-4xl mx-auto">
+            <!-- Option A - Blue -->
+            <button id="option0" class="quiz-option relative overflow-hidden rounded-xl p-4 md:p-6 text-left transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-xl" onclick="selectAnswer(0)" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
+                <div class="absolute top-0 left-0 w-full h-full bg-white/0 transition-all duration-300" id="option0Overlay"></div>
+                <div class="relative z-10 flex items-center gap-4">
+                    <span class="w-10 h-10 md:w-14 md:h-14 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center text-xl md:text-2xl font-black text-white option-letter">A</span>
+                    <span class="flex-1 text-base md:text-xl font-bold text-white option-text">Option A</span>
+                    <span class="option-icon hidden material-symbols-outlined text-3xl text-white">check_circle</span>
+                </div>
+                <div class="absolute bottom-0 left-0 h-1 bg-white/30 w-0 transition-all duration-500 option-progress"></div>
+            </button>
+            
+            <!-- Option B - Yellow -->
+            <button id="option1" class="quiz-option relative overflow-hidden rounded-xl p-4 md:p-6 text-left transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-xl" onclick="selectAnswer(1)" style="background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);">
+                <div class="absolute top-0 left-0 w-full h-full bg-white/0 transition-all duration-300" id="option1Overlay"></div>
+                <div class="relative z-10 flex items-center gap-4">
+                    <span class="w-10 h-10 md:w-14 md:h-14 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center text-xl md:text-2xl font-black text-white option-letter">B</span>
+                    <span class="flex-1 text-base md:text-xl font-bold text-white option-text">Option B</span>
+                    <span class="option-icon hidden material-symbols-outlined text-3xl text-white">check_circle</span>
+                </div>
+                <div class="absolute bottom-0 left-0 h-1 bg-white/30 w-0 transition-all duration-500 option-progress"></div>
+            </button>
+            
+            <!-- Option C - Pink -->
+            <button id="option2" class="quiz-option relative overflow-hidden rounded-xl p-4 md:p-6 text-left transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-xl" onclick="selectAnswer(2)" style="background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);">
+                <div class="absolute top-0 left-0 w-full h-full bg-white/0 transition-all duration-300" id="option2Overlay"></div>
+                <div class="relative z-10 flex items-center gap-4">
+                    <span class="w-10 h-10 md:w-14 md:h-14 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center text-xl md:text-2xl font-black text-white option-letter">C</span>
+                    <span class="flex-1 text-base md:text-xl font-bold text-white option-text">Option C</span>
+                    <span class="option-icon hidden material-symbols-outlined text-3xl text-white">check_circle</span>
+                </div>
+                <div class="absolute bottom-0 left-0 h-1 bg-white/30 w-0 transition-all duration-500 option-progress"></div>
+            </button>
+            
+            <!-- Option D - Green -->
+            <button id="option3" class="quiz-option relative overflow-hidden rounded-xl p-4 md:p-6 text-left transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-xl" onclick="selectAnswer(3)" style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);">
+                <div class="absolute top-0 left-0 w-full h-full bg-white/0 transition-all duration-300" id="option3Overlay"></div>
+                <div class="relative z-10 flex items-center gap-4">
+                    <span class="w-10 h-10 md:w-14 md:h-14 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center text-xl md:text-2xl font-black text-white option-letter">D</span>
+                    <span class="flex-1 text-base md:text-xl font-bold text-white option-text">Option D</span>
+                    <span class="option-icon hidden material-symbols-outlined text-3xl text-white">check_circle</span>
+                </div>
+                <div class="absolute bottom-0 left-0 h-1 bg-white/30 w-0 transition-all duration-500 option-progress"></div>
+            </button>
+        </div>
+        
+        <!-- Answer Feedback Overlay -->
+        <div id="answerFeedback" class="hidden fixed inset-0 z-20 flex items-center justify-center">
+            <div id="feedbackContent" class="text-center animate-bounce">
+                <!-- Will be populated by JS -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- ==================== RESULTS OVERLAY ==================== -->
+    <div id="resultsOverlay" class="fixed inset-0 bg-surface z-[100] hidden flex items-center justify-center p-4">
+        <div class="max-w-md w-full text-center">
+            <!-- Result Icon -->
+            <div id="resultIcon" class="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center">
+                <!-- Will be set by JS -->
+            </div>
+            
+            <!-- Score -->
+            <h2 id="resultTitle" class="text-3xl font-extrabold text-on-surface mb-2">Quiz Complete!</h2>
+            <p id="resultSubtitle" class="text-on-surface-variant mb-8">Here's how you did</p>
+            
+            <!-- Score Display -->
+            <div class="bg-surface-container-low rounded-2xl p-6 mb-6">
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <p class="text-xs text-on-surface-variant uppercase tracking-wider mb-1">Your Score</p>
+                        <p id="finalScore" class="text-4xl font-black text-primary">85%</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-on-surface-variant uppercase tracking-wider mb-1">Passing</p>
+                        <p class="text-4xl font-black text-secondary">60%</p>
+                    </div>
+                </div>
+                <div class="mt-4 pt-4 border-t border-outline-variant/10">
+                    <p class="text-sm text-on-surface-variant">
+                        <span id="correctCount">17</span> of <span id="totalCount">20</span> correct
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Status Message -->
+            <div id="statusMessage" class="mb-8">
+                <p class="text-on-surface font-medium">Great job! You've passed the quiz.</p>
+            </div>
+            
+            <!-- Actions -->
+            <div class="space-y-3">
+                <button id="retryBtn" onclick="retryQuiz()" class="w-full py-4 bg-primary text-white rounded-xl font-bold text-sm hover:bg-primary-container transition-all">
+                    Try Again (<span id="attemptsRemaining">2</span> attempts left)
+                </button>
+                <button onclick="closeResults()" class="w-full py-3 text-on-surface-variant font-medium text-sm hover:text-on-surface transition-colors">
+                    Back to Course
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ==================== QUIZ CONSENT POPUP ==================== -->
+    <div id="quizConsentPopup" class="fixed inset-0 z-[150] hidden flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="material-symbols-outlined text-4xl text-primary" style="font-variation-settings: 'FILL' 1;">quiz</span>
+                </div>
+                <h3 class="text-xl font-bold text-on-surface">Start Quiz?</h3>
+                <p class="text-on-surface-variant text-sm mt-2">You have <span id="consentAttemptsLeft" class="font-bold text-primary">3</span> attempt(s) remaining</p>
+            </div>
+            <div class="bg-surface-container-low rounded-xl p-4 mb-6">
+                <p class="text-xs text-on-surface-variant text-center">By starting, you agree that:</p>
+                <ul class="text-xs text-on-surface-variant mt-2 space-y-1">
+                    <li class="flex items-center gap-2"><span class="material-symbols-outlined text-sm text-primary">check</span> 20 questions, 30 seconds each</li>
+                    <li class="flex items-center gap-2"><span class="material-symbols-outlined text-sm text-primary">check</span> Need 60% to pass</li>
+                    <li class="flex items-center gap-2"><span class="material-symbols-outlined text-sm text-primary">check</span> Attempts cannot be reset</li>
+                </ul>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="closeQuizConsent()" class="flex-1 py-3 text-on-surface-variant font-semibold text-sm rounded-xl hover:bg-surface-container transition-colors">
+                    Cancel
+                </button>
+                <button onclick="confirmStartQuiz()" class="flex-1 py-3 bg-primary text-white font-bold text-sm rounded-xl hover:bg-primary-container transition-colors">
+                    Start Quiz
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ==================== MOBILE BOTTOM NAV ==================== -->
+    <nav class="fixed bottom-0 left-0 right-0 md:hidden bg-white/95 backdrop-blur-xl border-t border-outline-variant/10 h-16 safe-area-bottom z-50">
+        <div class="flex items-center justify-around h-full">
+            <button onclick="scrollToSection('curriculum')" class="flex flex-col items-center gap-1 text-on-surface-variant">
+                <span class="material-symbols-outlined text-2xl">import_contacts</span>
+                <span class="text-[10px] font-semibold">Curriculum</span>
+            </button>
+            <button onclick="scrollToSection('videoSection')" class="flex flex-col items-center gap-1 text-primary">
+                <span class="material-symbols-outlined text-2xl bg-primary/10 rounded-full p-1">play_circle</span>
+                <span class="text-[10px] font-semibold text-primary">Learn</span>
+            </button>
+            <button onclick="startQuiz()" class="flex flex-col items-center gap-1 text-on-surface-variant">
+                <span class="material-symbols-outlined text-2xl">quiz</span>
+                <span class="text-[10px] font-semibold">Quiz</span>
+            </button>
+            <button onclick="showProfile()" class="flex flex-col items-center gap-1 text-on-surface-variant">
+                <span class="material-symbols-outlined text-2xl">person</span>
+                <span class="text-[10px] font-semibold">Profile</span>
+            </button>
+        </div>
+    </nav>
+    
+    <!-- ==================== TOAST ==================== -->
+    <div id="toast" class="fixed bottom-20 md:bottom-8 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:w-auto bg-on-surface text-surface px-4 md:px-6 py-3 rounded-xl shadow-xl opacity-0 pointer-events-none transition-all duration-300 z-50 flex items-center gap-3 max-w-md mx-auto">
+        <span id="toastIcon" class="material-symbols-outlined text-lg shrink-0">check_circle</span>
+        <span id="toastMessage" class="text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis">Success!</span>
+    </div>
+    
+    <script>
+        // ==================== SAMPLE DATA ====================
+        const courseData = {
+            id: 'course_001',
+            title: 'Practical Pharmacology Batch 2',
+            instructor: 'Dr. Mehwish Kanwal',
+            currentModule: 1,
+            currentLesson: 2,
+            progress: 15,
+            modules: [
+                {
+                    id: 1,
+                    name: 'Safe Prescribing',
+                    lessons: [
+                        { id: '1-1', title: 'Foundations of Safe Prescribing', videoUrl: 'dQw4w9WgXcQ', description: 'Introduction to safe prescribing practices and basic principles.', hasQuiz: true, completed: true },
+                        { id: '1-2', title: 'Pharmacokinetics', videoUrl: 'dQw4w9WgXcQ', description: 'ADME processes and their clinical significance.', hasQuiz: true, completed: false, current: true },
+                        { id: '1-3', title: 'Adverse Drug Reactions', videoUrl: 'dQw4w9WgXcQ', description: 'Understanding and preventing adverse drug reactions.', hasQuiz: true, completed: false, locked: true }
+                    ]
+                },
+                {
+                    id: 2,
+                    name: 'Clinical Therapeutics',
+                    lessons: [
+                        { id: '2-1', title: 'Cardiovascular Medications', videoUrl: 'dQw4w9WgXcQ', description: 'Clinical use of CV medications.', hasQuiz: true, completed: false, locked: true },
+                        { id: '2-2', title: 'Diabetes Management', videoUrl: 'dQw4w9WgXcQ', description: 'Pharmacological management of diabetes.', hasQuiz: true, completed: false, locked: true },
+                        { id: '2-3', title: 'Antibiotic Selection', videoUrl: 'dQw4w9WgXcQ', description: 'Rational antibiotic therapy.', hasQuiz: true, completed: false, locked: true }
+                    ]
+                }
+            ]
+        };
+
+        // Quiz questions for each lesson (in real app, fetched from Firebase)
+        const quizBank = {
+            '1-1': [
+                { question: "What is the first step in safe prescribing?", options: ["Patient assessment", "Writing the prescription", "Checking allergies", "Consulting guidelines"], correct: 0 },
+                { question: "Which of the following is a key principle of safe prescribing?", options: ["Start high, go slow", "Polypharmacy is always best", "Consider patient factors", "Ignore drug interactions"], correct: 2 },
+                { question: "Before prescribing, you should always check:", options: ["Weather forecast", "Patient's allergies and contraindications", "Pharmacy hours", "Insurance coverage"], correct: 1 },
+                { question: "What does 'start low, go slow' mean?", options: ["Use cheap drugs first", "Begin with lowest effective dose", "Prescribe during business hours", "Use fewer medications"], correct: 1 },
+                { question: "Documentation of prescribing should include:", options: ["Only the drug name", "Drug, dose, route, frequency, rationale", "Just the patient's name", "Only the diagnosis"], correct: 1 }
+            ],
+            '1-2': [
+                { question: "What is the primary site of drug metabolism for lipophilic compounds?", options: ["Hepatic Cytochrome P450 System", "Renal Glomerular Filtration", "Pulmonary Alveolar Absorption", "Gastrointestinal Mucosa"], correct: 0 },
+                { question: "Which phase of drug metabolism involves conversion of parent drug to more polar metabolites?", options: ["Phase I (Functionalization)", "Phase II (Conjugation)", "Phase III (Excretion)", "Phase IV (Elimination)"], correct: 0 },
+                { question: "What is the first-pass effect?", options: ["Drug metabolism in the liver before reaching systemic circulation", "Initial absorption in the stomach", "First dose of a medication regimen", "Primary renal excretion"], correct: 0 },
+                { question: "Which bioavailability parameter indicates complete absorption of a drug?", options: ["F = 100%", "F = 50%", "F = 10%", "F = 0%"], correct: 0 },
+                { question: "The volume of distribution (Vd) is used to describe:", options: ["The theoretical volume needed to contain the total drug dose", "Blood plasma volume only", "Intracellular fluid volume", "Total body water"], correct: 0 },
+                { question: "Half-life (t½) is defined as:", options: ["Time required for plasma concentration to decrease by 50%", "Time for complete drug elimination", "Duration of drug action", "Time to reach peak concentration"], correct: 0 },
+                { question: "Which factor most affects drug distribution to the brain?", options: ["Blood-brain barrier permeability", "Liver metabolism rate", "Renal clearance", "Protein binding only"], correct: 0 },
+                { question: "Zero-order kinetics is characterized by:", options: ["Constant rate of elimination regardless of concentration", "Percentage-based elimination", "First-pass metabolism only", "Linear relationship with concentration"], correct: 0 },
+                { question: "Drug-drug interactions at CYP450 enzymes are most likely to occur with:", options: ["Drugs sharing the same metabolic pathway", "Drugs with different half-lives", "Drugs with high protein binding", "Drugs administered topically"], correct: 0 },
+                { question: "Which statement about prodrugs is TRUE?", options: ["They require metabolic activation to become therapeutically active", "They are immediately active upon administration", "They cannot be metabolized further", "They bypass Phase I metabolism"], correct: 0 }
+            ],
+            '1-3': [
+                { question: "What is the most common type of adverse drug reaction?", options: ["Type A (augmented)", "Type B (bizarre)", "Type C (chronic)", "Type D (delayed)"], correct: 0 },
+                { question: "Which organ is most commonly affected by drug toxicity?", options: ["Liver", "Lungs", "Skin", "Heart"], correct: 0 },
+                { question: "Idiosyncratic drug reactions are:", options: ["Unpredictable and unrelated to dose", "Dose-dependent", "Allergic reactions", "Only occur with overdoses"], correct: 0 },
+                { question: "Precipitation of adverse drug reactions can be prevented by:", options: ["Starting with high doses", "Monitoring and early detection", "Ignoring drug interactions", "Using multiple drugs"], correct: 1 },
+                { question: "Which is a hallmark of an allergic drug reaction?", options: ["Occurs on first exposure", "IgE mediated response", "Always dose-dependent", "Only affects liver"], correct: 1 }
+            ],
+            '2-1': [
+                { question: "What is the first-line treatment for hypertension?", options: ["ACE Inhibitors", "Beta blockers alone", "Calcium channel blockers", "Diuretics only"], correct: 3 },
+                { question: "Which class of drugs is contraindicated in asthma patients?", options: ["Beta blockers", "ACE inhibitors", "Statins", "Aspirin"], correct: 0 },
+                { question: "ACE inhibitors commonly cause which side effect?", options: ["Dry cough", "Constipation", "Diarrhea", "Headache"], correct: 0 },
+                { question: "What is the target blood pressure for most adults?", options: ["<140/90 mmHg", "<120/80 mmHg", "<160/100 mmHg", "<100/60 mmHg"], correct: 0 },
+                { question: "Which drug class is first-line for heart failure?", options: ["Beta blockers", "Antibiotics", "Chemotherapy", "Pain relievers"], correct: 0 }
+            ]
+        };
+        
+        // Quiz results per lesson (simulated)
+        const quizResults = {
+            '1-1': { bestScore: 85, attemptsUsed: 1, maxAttempts: 3, passed: true },
+            '1-2': { attemptsUsed: 0, maxAttempts: 3, passed: false }
+        };
+        
+        // Current lesson tracking
+        let currentLessonId = '1-2';
+        
+        // ==================== STATE ====================
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let timer = 30;
+        let timerInterval = null;
+        let selectedAnswer = null;
+        let quizInProgress = false;
+        let downloadedResources = [];
+        let currentQuizQuestions = [];
+        
+        // Video and Quiz completion tracking
+        let videoWatched = false;
+        let quizPassed = false;
+        
+        // ==================== INITIALIZATION ====================
+        function init() {
+            updateProgress(courseData.progress);
+            updateQuizSection();
+            loadLessonContent(currentLessonId);
+            updateAnalytics();
+            
+            // Initialize YouTube player when API is ready
+            if (typeof YT !== 'undefined' && YT.Player) {
+                initYouTubePlayer();
+            }
+        }
+        
+        function loadLessonContent(lessonId) {
+            const lesson = getLessonById(lessonId);
+            if (!lesson) return;
+            
+            currentLessonId = lessonId;
+            
+            // Update header
+            document.getElementById('courseTitle').textContent = courseData.title;
+            document.getElementById('currentLessonTitle').textContent = `Module ${lesson.moduleId}, Day ${lesson.id.split('-')[1]}: ${lesson.title}`;
+            
+            // Update lesson info
+            document.getElementById('lessonTabTitle').textContent = lesson.title;
+            document.getElementById('lessonTabDescription').textContent = lesson.description;
+            
+            // Reset video/quiz completion for this lesson
+            videoWatched = false;
+            quizPassed = quizResults[lessonId]?.passed || false;
+            
+            updateMarkCompleteButton();
+            updateQuizSection();
+            
+            // Load video
+            if (player && player.loadVideoById) {
+                player.loadVideoById(lesson.videoUrl);
+            }
+        }
+        
+        function updateAnalytics() {
+            // Calculate overall progress
+            let totalLessons = 0;
+            let completedLessons = 0;
+            let quizzesPassed = 0;
+            let totalScore = 0;
+            let scoreCount = 0;
+            
+            courseData.modules.forEach(module => {
+                module.lessons.forEach(lesson => {
+                    totalLessons++;
+                    if (lesson.completed) completedLessons++;
+                    if (quizResults[lesson.id]?.passed) {
+                        quizzesPassed++;
+                        totalScore += quizResults[lesson.id].bestScore;
+                        scoreCount++;
+                    }
+                });
+            });
+            
+            const progressPercent = Math.round((completedLessons / totalLessons) * 100);
+            const avgScore = scoreCount > 0 ? Math.round(totalScore / scoreCount) : 0;
+            
+            // Update desktop analytics sidebar
+            document.getElementById('analyticsProgressPercent').textContent = progressPercent + '%';
+            const ring = document.getElementById('analyticsProgressRing');
+            const circumference = 351.86;
+            ring.style.strokeDashoffset = circumference - (progressPercent / 100) * circumference;
+            
+            document.getElementById('analyticsVideosWatched').textContent = completedLessons;
+            document.getElementById('analyticsQuizzesPassed').textContent = quizzesPassed;
+            document.getElementById('analyticsAvgScore').textContent = avgScore + '%';
+            
+            // Update mobile analytics
+            document.getElementById('mobileAnalyticsPercent').textContent = progressPercent + '%';
+            document.getElementById('mobileQuickStats').textContent = completedLessons + ' Videos • ' + quizzesPassed + ' Quiz • ' + avgScore + '%';
+            document.getElementById('mobileAnalyticsPercentRing').textContent = progressPercent + '%';
+            document.getElementById('mobileVideosWatched').textContent = completedLessons;
+            document.getElementById('mobileQuizzesPassed').textContent = quizzesPassed;
+            document.getElementById('mobileAvgScore').textContent = avgScore + '%';
+            
+            const mobileRing = document.getElementById('mobileAnalyticsProgressRing');
+            if (mobileRing) {
+                mobileRing.style.strokeDashoffset = 226.19 - (progressPercent / 100) * 226.19;
+            }
+        }
+        
+        function toggleMobileAnalytics() {
+            const content = document.getElementById('mobileAnalyticsContent');
+            const toggle = document.getElementById('analyticsToggle');
+            
+            content.classList.toggle('hidden');
+            toggle.style.transform = content.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+        }
+        
+        // ==================== YOUTUBE PLAYER ====================
+        let player;
+        
+        function initYouTubePlayer() {
+            player = new YT.Player('youtubePlayer', {
+                height: '100%',
+                width: '100%',
+                videoId: '', // Will be set when lesson loads
+                playerVars: {
+                    'playsinline': 1,
+                    'rel': 0,
+                    'modestbranding': 1
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+        
+        function onPlayerReady(event) {
+            // Player is ready
+        }
+        
+        function onPlayerStateChange(event) {
+            if (event.data == YT.PlayerState.ENDED) {
+                // Video completed
+                videoWatched = true;
+                updateMarkCompleteButton();
+                showToast('Video completed! Now take the quiz.', 'success');
+            }
+        }
+        
+        function playVideo() {
+            document.getElementById('videoOverlay').style.display = 'none';
+            if (player && player.playVideo) {
+                player.playVideo();
+            }
+            // Mark as watched after 80% watched (simplified - marks after play)
+            setTimeout(() => {
+                if (!videoWatched) {
+                    videoWatched = true;
+                    updateMarkCompleteButton();
+                }
+            }, 5000); // Consider watched after 5 seconds of playback
+        }
+        
+        // ==================== PROGRESS ====================
+        function updateProgress(percent) {
+            document.getElementById('headerProgress').style.width = percent + '%';
+            document.getElementById('headerProgressText').textContent = percent + '%';
+            document.getElementById('mobileProgress').style.width = percent + '%';
+            document.getElementById('mobileProgressText').textContent = percent + '%';
+        }
+        
+        function markLessonComplete() {
+            // Check if requirements are met
+            if (!videoWatched || !quizPassed) {
+                showToast('Please watch the video and pass the quiz first!', 'error');
+                return;
+            }
+            
+            courseData.progress = Math.min(100, courseData.progress + 10);
+            updateProgress(courseData.progress);
+            showToast('Lesson marked as complete!', 'success');
+            
+            // Save to Firebase
+            saveProgressToFirebase(courseData.id, 'lesson_1_2');
+            updateProgressPercentToFirebase(courseData.id, courseData.progress);
+            
+            if (courseData.progress >= 100) {
+                document.getElementById('certificateSection').classList.remove('hidden');
+            }
+        }
+        
+        // Update Mark Complete button based on requirements
+        function updateMarkCompleteButton() {
+            const btn = document.getElementById('markCompleteBtn');
+            const text = document.getElementById('markCompleteText');
+            const reqVideo = document.getElementById('reqVideo');
+            const reqQuiz = document.getElementById('reqQuiz');
+            
+            // Update video requirement
+            if (videoWatched) {
+                reqVideo.classList.remove('text-on-surface-variant');
+                reqVideo.classList.add('text-secondary');
+                reqVideo.querySelector('.material-symbols-outlined').textContent = 'check_circle';
+                reqVideo.querySelector('span:first-child').classList.remove('border-surface-variant');
+                reqVideo.querySelector('span:first-child').classList.add('border-secondary', 'bg-secondary', 'text-white');
+            }
+            
+            // Update quiz requirement
+            if (quizPassed) {
+                reqQuiz.classList.remove('text-on-surface-variant');
+                reqQuiz.classList.add('text-secondary');
+                reqQuiz.querySelector('.material-symbols-outlined').textContent = 'check_circle';
+                reqQuiz.querySelector('span:first-child').classList.remove('border-surface-variant');
+                reqQuiz.querySelector('span:first-child').classList.add('border-secondary', 'bg-secondary', 'text-white');
+            }
+            
+            // Update button state
+            if (videoWatched && quizPassed) {
+                btn.style.background = 'linear-gradient(135deg, #005539, #04704d)';
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                btn.classList.add('cursor-pointer', 'hover:shadow-lg');
+                btn.querySelector('.material-symbols-outlined').textContent = 'check';
+                text.textContent = 'Mark Complete';
+            } else {
+                btn.style.background = '#6f7a72';
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
+                btn.classList.remove('cursor-pointer');
+                btn.querySelector('.material-symbols-outlined').textContent = 'lock';
+                
+                if (!videoWatched && !quizPassed) {
+                    text.textContent = 'Watch Video & Pass Quiz';
+                } else if (!videoWatched) {
+                    text.textContent = 'Watch Video First';
+                } else {
+                    text.textContent = 'Pass Quiz First';
+                }
+            }
+        }
+        
+        // ==================== CURRICULUM ====================
+        function toggleModule(moduleNum) {
+            const moduleItem = document.querySelector(`[data-module="${moduleNum}"]`);
+            const lessons = moduleItem.querySelector('.module-lessons');
+            const arrow = moduleItem.querySelector('.module-arrow');
+            
+            lessons.classList.toggle('hidden');
+            arrow.style.transform = lessons.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+        }
+        
+        function selectLesson(moduleNum, lessonNum) {
+            const lessonId = `${moduleNum}-${lessonNum}`;
+            const lesson = getLessonById(lessonId);
+            
+            if (lesson?.locked) {
+                showToast('Complete previous lessons first', 'info');
+                return;
+            }
+            
+            showToast(`Loading ${lesson.title}...`, 'success');
+            loadLessonContent(lessonId);
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // ==================== RESOURCES ====================
+        function downloadResource(element, filename) {
+            const statusDiv = element.querySelector('.resource-status');
+            const actionSpan = element.querySelector('.resource-action span');
+            
+            // Simulate download
+            showToast(`Downloading ${filename}...`, 'success');
+            
+            // Track in Firebase
+            trackDownloadToFirebase(courseData.id, filename, filename);
+            
+            setTimeout(() => {
+                downloadedResources.push(filename);
+                statusDiv.classList.remove('hidden');
+                statusDiv.querySelector('span:last-child').textContent = 'Downloaded';
+                actionSpan.textContent = 'check_circle';
+                actionSpan.classList.remove('text-primary');
+                actionSpan.classList.add('text-secondary');
+                
+                console.log('Downloaded resources:', downloadedResources);
+            }, 1500);
+        }
+        
+        // ==================== QUIZ ====================
+        function getCurrentLessonQuiz() {
+            const result = quizResults[currentLessonId] || { attemptsUsed: 0, maxAttempts: 3, bestScore: null, passed: false };
+            return {
+                questions: quizBank[currentLessonId] || [],
+                ...result
+            };
+        }
+        
+        function getLessonById(lessonId) {
+            for (const module of courseData.modules) {
+                const lesson = module.lessons.find(l => l.id === lessonId);
+                if (lesson) return { ...lesson, moduleId: module.id };
+            }
+            return null;
+        }
+        
+        function updateQuizSection() {
+            const lesson = getLessonById(currentLessonId);
+            const quiz = getCurrentLessonQuiz();
+            
+            if (!lesson || !lesson.hasQuiz) {
+                document.querySelector('[onclick="startQuiz()"]').closest('section').style.display = 'none';
+                return;
+            }
+            
+            // Update quiz header
+            document.getElementById('quizBadge').textContent = `Module ${lesson.moduleId} Quiz`;
+            document.getElementById('quizTitle').textContent = lesson.title + ' Quiz';
+            
+            // Update status badge
+            const statusBadge = document.getElementById('quizStatusBadge');
+            if (quiz.passed) {
+                statusBadge.classList.remove('hidden');
+                statusBadge.textContent = 'Passed';
+            } else {
+                statusBadge.classList.add('hidden');
+            }
+            
+            // Update scores
+            updateQuizDisplay();
+        }
+        
+        function startQuiz() {
+            const lesson = getLessonById(currentLessonId);
+            if (!lesson || !lesson.hasQuiz) {
+                showToast('No quiz available for this lesson', 'info');
+                return;
+            }
+            
+            const quiz = getCurrentLessonQuiz();
+            const attemptsRemaining = quiz.maxAttempts - quiz.attemptsUsed;
+            
+            if (attemptsRemaining <= 0) {
+                showToast('No attempts remaining for this quiz', 'error');
+                return;
+            }
+            
+            document.getElementById('consentAttemptsLeft').textContent = attemptsRemaining;
+            document.getElementById('quizConsentPopup').classList.remove('hidden');
+        }
+        
+        function closeQuizConsent() {
+            document.getElementById('quizConsentPopup').classList.add('hidden');
+        }
+        
+        function confirmStartQuiz() {
+            closeQuizConsent();
+            
+            const quiz = getCurrentLessonQuiz();
+            console.log('Quiz data:', quiz);
+            console.log('Questions:', quiz.questions);
+            
+            currentQuestionIndex = 0;
+            score = 0;
+            selectedAnswer = null;
+            quizInProgress = true;
+            currentQuizQuestions = quiz.questions;
+            
+            console.log('currentQuizQuestions set to:', currentQuizQuestions);
+            
+            // Update total questions display
+            document.getElementById('totalQuestions').textContent = currentQuizQuestions.length;
+            
+            document.getElementById('quizOverlay').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            document.getElementById('totalPoints').textContent = '0';
+            
+            showQuestion();
+        }
+        
+        function showQuestion() {
+            console.log('showQuestion called, currentQuizQuestions:', currentQuizQuestions);
+            console.log('currentQuestionIndex:', currentQuestionIndex);
+            
+            if (currentQuizQuestions.length === 0) {
+                showToast('No questions available for this quiz', 'error');
+                closeQuizConsent();
+                return;
+            }
+            
+            const q = currentQuizQuestions[currentQuestionIndex];
+            if (!q) {
+                endQuiz();
+                return;
+            }
+            
+            // Update question number
+            document.getElementById('currentQuestionNum').textContent = currentQuestionIndex + 1;
+            
+            // Update question text
+            document.getElementById('questionText').textContent = q.question;
+            
+            // Update options
+            const optionIds = ['option0', 'option1', 'option2', 'option3'];
+            const colors = ['#3b82f6', '#eab308', '#ec4899', '#22c55e']; // Blue, Yellow, Pink, Green
+            
+            optionIds.forEach((id, index) => {
+                const btn = document.getElementById(id);
+                btn.querySelector('.option-text').textContent = q.options[index];
+                btn.querySelector('.option-letter').textContent = String.fromCharCode(65 + index);
+                btn.className = `quiz-option relative overflow-hidden rounded-xl p-4 md:p-6 text-left transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-xl ${btn.className.includes('correct') || btn.className.includes('incorrect') ? '' : ''}`;
+                btn.style.background = `linear-gradient(135deg, ${colors[index]} 0%, ${adjustColor(colors[index], -15)} 100%)`;
+                btn.onclick = () => selectAnswer(index);
+                btn.disabled = false;
+                btn.classList.remove('correct', 'incorrect', 'answered');
+                btn.querySelector('.option-progress').style.width = '0%';
+                btn.querySelector('.option-icon').classList.add('hidden');
+                btn.querySelector('.option-letter').classList.remove('bg-green-500', 'bg-red-500');
+                btn.querySelector('.option-letter').classList.add('bg-white/20');
+            });
+            
+            selectedAnswer = null;
+            
+            // Start timer
+            startTimer();
+        }
+        
+        function adjustColor(color, amount) {
+            const hex = color.replace('#', '');
+            const r = Math.max(0, Math.min(255, parseInt(hex.slice(0, 2), 16) + amount));
+            const g = Math.max(0, Math.min(255, parseInt(hex.slice(2, 4), 16) + amount));
+            const b = Math.max(0, Math.min(255, parseInt(hex.slice(4, 6), 16) + amount));
+            return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+        }
+        
+        function startTimer() {
+            timer = 30;
+            updateTimerDisplay();
+            
+            if (timerInterval) clearInterval(timerInterval);
+            
+            timerInterval = setInterval(() => {
+                timer--;
+                updateTimerDisplay();
+                
+                // Animate progress bar on options
+                const progressPercent = ((30 - timer) / 30) * 100;
+                document.querySelectorAll('.quiz-option').forEach(btn => {
+                    if (!btn.classList.contains('answered')) {
+                        btn.querySelector('.option-progress').style.width = progressPercent + '%';
+                    }
+                });
+                
+                if (timer <= 0) {
+                    clearInterval(timerInterval);
+                    if (selectedAnswer === null) {
+                        selectAnswer(-1); // No answer selected
+                    }
+                }
+            }, 1000);
+        }
+        
+        function updateTimerDisplay() {
+            const timerText = document.getElementById('timerText');
+            const timerRing = document.getElementById('timerRing');
+            
+            timerText.textContent = timer;
+            
+            // Update ring (213.6 is full circumference for r=34)
+            const offset = 213.6 - (timer / 30) * 213.6;
+            timerRing.style.strokeDashoffset = offset;
+            
+            // Change color when low
+            if (timer <= 5) {
+                timerRing.classList.remove('text-yellow-400');
+                timerRing.classList.add('text-red-500');
+                timerText.classList.add('text-red-500');
+                timerText.classList.remove('text-white');
+            } else if (timer <= 10) {
+                timerRing.classList.remove('text-red-500');
+                timerRing.classList.add('text-yellow-400');
+                timerText.classList.remove('text-red-500');
+                timerText.classList.add('text-white');
+            }
+        }
+        
+        function selectAnswer(answerIndex) {
+            if (selectedAnswer !== null || answerIndex === -1) return;
+            
+            selectedAnswer = answerIndex;
+            clearInterval(timerInterval);
+            
+            const q = quizQuestions[currentQuestionIndex];
+            const isCorrect = answerIndex === q.correct;
+            const pointsEarned = isCorrect ? Math.round(1000 * (timer / 30)) : 0;
+            score += pointsEarned;
+            
+            // Update total points display
+            document.getElementById('totalPoints').textContent = score;
+            
+            // Show points animation
+            showPointsAnimation(pointsEarned, isCorrect);
+            
+            // Mark all options as answered
+            const optionIds = ['option0', 'option1', 'option2', 'option3'];
+            optionIds.forEach((id, index) => {
+                const btn = document.getElementById(id);
+                btn.classList.add('answered');
+                btn.onclick = null;
+                btn.disabled = true;
+                
+                if (index === q.correct) {
+                    btn.classList.add('correct');
+                    btn.querySelector('.option-letter').classList.remove('bg-white/20');
+                    btn.querySelector('.option-letter').classList.add('bg-green-500');
+                    btn.querySelector('.option-icon').textContent = 'check_circle';
+                    btn.querySelector('.option-icon').classList.remove('hidden');
+                } else if (index === answerIndex) {
+                    btn.classList.add('incorrect');
+                    btn.querySelector('.option-letter').classList.remove('bg-white/20');
+                    btn.querySelector('.option-letter').classList.add('bg-red-500');
+                    btn.querySelector('.option-icon').textContent = 'cancel';
+                    btn.querySelector('.option-icon').classList.remove('hidden');
+                }
+                
+                // Complete progress bar
+                btn.querySelector('.option-progress').style.width = '100%';
+            });
+            
+            // Show feedback overlay
+            showAnswerFeedback(isCorrect, q.options[q.correct], pointsEarned);
+        }
+        
+        function showPointsAnimation(points, isCorrect) {
+            if (points > 0) {
+                const pointsEl = document.createElement('div');
+                pointsEl.className = 'fixed text-4xl font-black text-yellow-400 points-float';
+                pointsEl.style.top = '40%';
+                pointsEl.style.left = '50%';
+                pointsEl.style.transform = 'translateX(-50%)';
+                pointsEl.style.textShadow = '0 4px 20px rgba(0,0,0,0.5)';
+                pointsEl.textContent = `+${points}`;
+                document.body.appendChild(pointsEl);
+                
+                setTimeout(() => pointsEl.remove(), 1000);
+            }
+        }
+        
+        function showAnswerFeedback(isCorrect, correctAnswer, points) {
+            const feedback = document.getElementById('answerFeedback');
+            const content = document.getElementById('feedbackContent');
+            
+            if (isCorrect) {
+                content.innerHTML = `
+                    <div class="text-8xl mb-4">🎉</div>
+                    <h3 class="text-3xl font-black text-white mb-2">Correct!</h3>
+                    <p class="text-white/80 text-xl">+${points} points</p>
+                `;
+                feedback.style.background = 'rgba(34, 197, 94, 0.3)';
+            } else {
+                content.innerHTML = `
+                    <div class="text-8xl mb-4">❌</div>
+                    <h3 class="text-3xl font-black text-white mb-2">Oops!</h3>
+                    <p class="text-white/80 text-xl">Answer: ${correctAnswer}</p>
+                `;
+                feedback.style.background = 'rgba(239, 68, 68, 0.3)';
+            }
+            
+            feedback.classList.remove('hidden');
+            
+            // Auto advance after delay
+            setTimeout(() => {
+                feedback.classList.remove('hidden');
+                currentQuestionIndex++;
+                
+                if (currentQuestionIndex >= currentQuizQuestions.length) {
+                    endQuiz();
+                } else {
+                    showQuestion();
+                }
+            }, 1500);
+        }
+        
+        function endQuiz() {
+            clearInterval(timerInterval);
+            quizInProgress = false;
+            
+            const percentage = Math.round((score / (currentQuizQuestions.length * 1000)) * 100);
+            const passed = percentage >= 60; // 60% passing
+            
+            // Update quiz results for this lesson
+            if (!quizResults[currentLessonId]) {
+                quizResults[currentLessonId] = { attemptsUsed: 0, maxAttempts: 3, bestScore: null, passed: false };
+            }
+            quizResults[currentLessonId].attemptsUsed++;
+            if (!quizResults[currentLessonId].bestScore || percentage > quizResults[currentLessonId].bestScore) {
+                quizResults[currentLessonId].bestScore = percentage;
+            }
+            
+            // Set quizPassed if passed
+            if (passed) {
+                quizResults[currentLessonId].passed = true;
+                quizPassed = true;
+                updateMarkCompleteButton();
+            }
+            
+            // Save to Firebase
+            saveQuizAttemptToFirebase(courseData.id, {
+                lessonId: currentLessonId,
+                attemptNumber: quizResults[currentLessonId].attemptsUsed,
+                score: score,
+                percentage: percentage,
+                passed: passed,
+                answers: []
+            });
+            
+            // Update results overlay
+            const resultIcon = document.getElementById('resultIcon');
+            const resultTitle = document.getElementById('resultTitle');
+            const resultSubtitle = document.getElementById('resultSubtitle');
+            const statusMessage = document.getElementById('statusMessage');
+            
+            document.getElementById('finalScore').textContent = percentage + '%';
+            document.getElementById('correctCount').textContent = Math.round((percentage / 100) * quizQuestions.length);
+            document.getElementById('attemptsRemaining').textContent = courseData.quiz.maxAttempts - courseData.quiz.attemptsUsed;
+            
+                if (passed) {
+                    resultIcon.className = 'w-24 h-24 mx-auto mb-6 rounded-full bg-secondary-container flex items-center justify-center';
+                    resultIcon.innerHTML = '<span class="material-symbols-outlined text-6xl text-white" style="font-variation-settings: \'FILL\' 1;">verified</span>';
+                    resultTitle.textContent = 'Congratulations!';
+                    resultSubtitle.textContent = 'You passed the quiz';
+                    statusMessage.innerHTML = '<p class="text-secondary font-medium">Great work! You\'ve mastered this section.</p>';
+                    document.getElementById('retryBtn').textContent = 'Quiz Again';
+                    document.getElementById('retryBtn').onclick = retryQuiz;
+                    
+                    // Confetti celebration!
+                    launchConfetti();
+                    
+                    // Update course progress
+                    courseData.progress = Math.min(100, courseData.progress + 20);
+                    updateProgress(courseData.progress);
+                    
+                    if (courseData.progress >= 100) {
+                        document.getElementById('certificateSection').classList.remove('hidden');
+                    }
+                } else {
+                resultIcon.className = 'w-24 h-24 mx-auto mb-6 rounded-full bg-error-container flex items-center justify-center';
+                resultIcon.innerHTML = '<span class="material-symbols-outlined text-6xl text-error" style="font-variation-settings: \'FILL\' 1;">refresh</span>';
+                resultTitle.textContent = 'Keep Trying!';
+                resultSubtitle.textContent = 'You need 60% to pass';
+                
+                const remaining = courseData.quiz.maxAttempts - courseData.quiz.attemptsUsed;
+                if (remaining > 0) {
+                    statusMessage.innerHTML = `<p class="text-on-surface-variant">You have ${remaining} attempt${remaining > 1 ? 's' : ''} remaining.</p>`;
+                    document.getElementById('retryBtn').textContent = `Try Again (${remaining} left)`;
+                } else {
+                    statusMessage.innerHTML = '<p class="text-error font-medium">No attempts remaining. Contact support.</p>';
+                    document.getElementById('retryBtn').style.display = 'none';
+                }
+            }
+            
+            updateQuizDisplay();
+            
+            // Hide quiz, show results
+            document.getElementById('quizOverlay').classList.add('hidden');
+            document.getElementById('resultsOverlay').classList.remove('hidden');
+        }
+        
+        function retryQuiz() {
+            const quiz = getCurrentLessonQuiz();
+            if (quiz.attemptsUsed >= quiz.maxAttempts) {
+                showToast('No attempts remaining', 'error');
+                return;
+            }
+            
+            document.getElementById('resultsOverlay').classList.add('hidden');
+            document.getElementById('retryBtn').style.display = 'block';
+            startQuiz();
+        }
+        
+        function closeResults() {
+            document.getElementById('resultsOverlay').classList.add('hidden');
+            document.body.style.overflow = '';
+            updateQuizSection();
+        }
+        
+        function updateQuizDisplay() {
+            const quiz = getCurrentLessonQuiz();
+            document.getElementById('bestScore').textContent = quiz.bestScore ? quiz.bestScore + '%' : '--';
+            document.getElementById('attemptsLeft').textContent = `${quiz.maxAttempts - quiz.attemptsUsed} / ${quiz.maxAttempts}`;
+            
+            if (quiz.attemptsUsed >= quiz.maxAttempts) {
+                document.getElementById('startQuizBtn').disabled = true;
+                document.getElementById('startQuizBtn').classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                document.getElementById('startQuizBtn').disabled = false;
+                document.getElementById('startQuizBtn').classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+        
+        // ==================== CERTIFICATE ====================
+        function downloadCertificate() {
+            showToast('Generating your certificate...', 'success');
+            
+            // In real app, this would generate/download PDF
+            setTimeout(() => {
+                showToast('Certificate downloaded!', 'success');
+            }, 2000);
+        }
+        
+        // ==================== NAVIGATION ====================
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+        
+        function showProfile() {
+            showToast('Profile coming soon!', 'info');
+        }
+        
+        // ==================== TOAST ====================
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastIcon = document.getElementById('toastIcon');
+            
+            toastMessage.textContent = message;
+            if (type === 'success') {
+                toastIcon.textContent = 'check_circle';
+            } else if (type === 'error') {
+                toastIcon.textContent = 'error';
+            } else {
+                toastIcon.textContent = 'info';
+            }
+            
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            toast.classList.add('opacity-100');
+            
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 3000);
+        }
+        
+        // ==================== CONFETTI ====================
+        function launchConfetti() {
+            const colors = ['#005539', '#04704d', '#6bfe9c', '#eab308', '#ec4899', '#3b82f6'];
+            
+            for (let i = 0; i < 100; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                    confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                    confetti.style.width = (Math.random() * 10 + 5) + 'px';
+                    confetti.style.height = (Math.random() * 10 + 5) + 'px';
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => confetti.remove(), 4000);
+                }, i * 20);
+            }
+        }
+        
+        // ==================== INITIALIZE ====================
+        document.addEventListener('DOMContentLoaded', init);
+        
+        // Fallback for YouTube API
+        window.onYouTubeIframeAPIReady = initYouTubePlayer;
+    </script>
+</body>
+</html>
