@@ -107,51 +107,7 @@ tailwind.config = {
 
     <!-- Sidebar -->
     <aside id="sidebar" class="fixed left-0 top-0 h-full w-64 sidebar-gradient flex flex-col py-6 z-50 shadow-xl transform -translate-x-full md:translate-x-0 transition-transform duration-300">
-        <div class="flex items-center gap-3 px-4 mb-10">
-            <div class="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center overflow-hidden">
-                <span class="material-symbols-outlined text-white text-2xl" style="font-variation-settings: 'FILL' 1;">school</span>
-            </div>
-            <div>
-                <h1 class="text-white font-headline font-bold text-lg tracking-tight">PZ Academy</h1>
-                <p class="text-white/60 text-[10px] font-medium tracking-widest uppercase">LMS Admin</p>
-            </div>
-        </div>
-        <nav class="flex-1 px-3 space-y-1">
-            <a href="admin-dashboard.html" class="flex items-center gap-3 px-4 py-3 text-white/70 hover:text-white hover:bg-white/5 transition-all duration-300 rounded-md font-medium text-sm">
-                <span class="material-symbols-outlined text-lg">dashboard</span>
-                <span>Dashboard</span>
-            </a>
-            <a href="admin-students.html" class="flex items-center gap-3 px-4 py-3 text-white/70 hover:text-white hover:bg-white/5 transition-all duration-300 rounded-md font-medium text-sm">
-                <span class="material-symbols-outlined text-lg">group</span>
-                <span>Students</span>
-            </a>
-            <a href="admin-course-manager.html" class="flex items-center gap-3 px-4 py-3 text-white/70 hover:text-white hover:bg-white/5 transition-all duration-300 rounded-md font-medium text-sm">
-                <span class="material-symbols-outlined text-lg">school</span>
-                <span>Courses</span>
-            </a>
-            <a href="admin-quiz-builder.html" class="flex items-center gap-3 px-4 py-3 text-white/70 hover:text-white hover:bg-white/5 transition-all duration-300 rounded-md font-medium text-sm">
-                <span class="material-symbols-outlined text-lg">quiz</span>
-                <span>Quiz Builder</span>
-            </a>
-            <a href="admin-certificates.html" class="flex items-center gap-3 px-4 py-3 text-white/70 hover:text-white hover:bg-white/5 transition-all duration-300 rounded-md font-medium text-sm">
-                <span class="material-symbols-outlined text-lg">workspace_premium</span>
-                <span>Certificates</span>
-            </a>
-            <a href="admin-settings.html" class="flex items-center gap-3 px-4 py-3 bg-white/10 backdrop-blur-sm text-white font-bold rounded-md">
-                <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">settings</span>
-                <span>Settings</span>
-            </a>
-        </nav>
-        <div class="pt-6 mt-6 border-t border-white/10 space-y-1">
-            <a href="#" class="flex items-center gap-3 px-4 py-3 text-white/70 hover:text-white hover:bg-white/10 transition-all rounded-md font-medium text-sm">
-                <span class="material-symbols-outlined text-lg">support_agent</span>
-                <span>Support</span>
-            </a>
-            <a href="#" onclick="showLogoutModal(); return false;" class="flex items-center gap-3 px-4 py-3 text-white/70 hover:text-white hover:bg-white/10 transition-all rounded-md font-medium text-sm">
-                <span class="material-symbols-outlined text-lg">logout</span>
-                <span>Logout</span>
-            </a>
-        </div>
+        <!-- Injected via admin-layout.js -->
     </aside>
 
     <!-- Main Content -->
@@ -482,12 +438,6 @@ tailwind.config = {
     </div>
 
     <script>
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            sidebar.classList.toggle('-translate-x-full');
-            overlay.classList.toggle('hidden');
-        }
 
         function switchTab(tabName) {
             // Hide all tab content sections
@@ -523,20 +473,7 @@ tailwind.config = {
             }
         }
 
-        function showLogoutModal() {
-            document.getElementById('logoutModal').classList.remove('hidden');
-            document.getElementById('logoutModal').classList.add('flex');
-        }
 
-        function closeLogoutModal() {
-            document.getElementById('logoutModal').classList.add('hidden');
-            document.getElementById('logoutModal').classList.remove('flex');
-        }
-
-        function confirmLogout() {
-            sessionStorage.removeItem('adminSession');
-            window.location.href = 'admin-login.html';
-        }
 
         function saveSettings() {
             const settings = {
@@ -614,9 +551,14 @@ tailwind.config = {
         // Close modal on escape
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                closeLogoutModal();
+                if (typeof closeLogoutModal === 'function') closeLogoutModal();
             }
         });
+    </script>
+    <script type="module">
+        import { checkAdminSession, renderSidebar } from './admin-layout.js';
+        checkAdminSession();
+        renderSidebar('settings');
     </script>
 </body>
 </html>

@@ -142,48 +142,7 @@
 
     <!-- Sidebar -->
     <aside id="sidebar" class="fixed left-0 top-0 h-full w-64 sidebar-gradient flex flex-col py-6 z-50 shadow-xl transform -translate-x-full md:translate-x-0 transition-transform duration-300">
-        <div class="px-6 mb-10">
-            <h1 class="text-xl font-bold tracking-tighter text-white font-headline">PZ Academy</h1>
-            <p class="text-[10px] text-white/60 font-label tracking-widest uppercase mt-1">Clinical Admin Portal</p>
-        </div>
-        <nav class="flex-1 px-3 space-y-1">
-            <a href="admin-dashboard.html" class="sidebar-link active flex items-center px-3 py-2.5 rounded-lg text-white">
-                <span class="material-symbols-outlined mr-3 text-sm" style="font-variation-settings: 'FILL' 1;">dashboard</span>
-                <span class="font-display font-semibold text-sm tracking-tight">Dashboard</span>
-            </a>
-            <a href="admin-students.html" class="sidebar-link flex items-center px-3 py-2.5 rounded-lg text-white/70 hover:text-white">
-                <span class="material-symbols-outlined mr-3 text-sm">group</span>
-                <span class="font-display font-medium text-sm tracking-tight">Students</span>
-            </a>
-            <a href="admin-course-manager.html" class="sidebar-link flex items-center px-3 py-2.5 rounded-lg text-white/70 hover:text-white">
-                <span class="material-symbols-outlined mr-3 text-sm">school</span>
-                <span class="font-display font-medium text-sm tracking-tight">Courses</span>
-            </a>
-            <a href="admin-quiz-builder.html" class="sidebar-link flex items-center px-3 py-2.5 rounded-lg text-white/70 hover:text-white">
-                <span class="material-symbols-outlined mr-3 text-sm">quiz</span>
-                <span class="font-display font-medium text-sm tracking-tight">Quiz Builder</span>
-            </a>
-            <a href="admin-certificates.html" class="sidebar-link flex items-center px-3 py-2.5 rounded-lg text-white/70 hover:text-white">
-                <span class="material-symbols-outlined mr-3 text-sm">workspace_premium</span>
-                <span class="font-display font-medium text-sm tracking-tight">Certificates</span>
-            </a>
-            <a href="admin-settings.html" class="sidebar-link flex items-center px-3 py-2.5 rounded-lg text-white/70 hover:text-white">
-                <span class="material-symbols-outlined mr-3 text-sm">settings</span>
-                <span class="font-display font-medium text-sm tracking-tight">Settings</span>
-            </a>
-        </nav>
-        <div class="px-6 mt-auto">
-            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 flex items-center gap-3">
-                <div id="sidebarAvatar" class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-xs font-display font-bold text-white ring-2 ring-white/20 flex-shrink-0">SA</div>
-                <div class="overflow-hidden flex-1 min-w-0">
-                    <p id="sidebarName" class="text-white text-xs font-bold truncate">Super Administrator</p>
-                    <p id="sidebarRole" class="text-white/60 text-[10px] truncate">Super Admin</p>
-                </div>
-                <button onclick="showLogoutModal()" class="text-white/60 hover:text-white transition-opacity flex-shrink-0">
-                    <span class="material-symbols-outlined text-sm">logout</span>
-                </button>
-            </div>
-        </div>
+        <!-- Injected via admin-layout.js -->
     </aside>
 
     <!-- Main Content -->
@@ -511,64 +470,14 @@
         </div>
     </div>
 
-    <script>
-        function checkSession() {
-            const session = sessionStorage.getItem('pz_admin_session');
-            if (!session) { showSessionExpired(); return null; }
-            const data = JSON.parse(session);
-            if (Date.now() > data.expiresAt) { sessionStorage.removeItem('pz_admin_session'); showSessionExpired(); return null; }
-            return data;
-        }
-
-        function showSessionExpired() {
-            document.getElementById('sessionExpiredModal').classList.remove('hidden');
-            document.getElementById('sessionExpiredModal').classList.add('flex');
-        }
-
-        function populateAdminInfo(admin) {
-            const initials = admin.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-            const roleLabel = admin.role.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-            document.getElementById('sidebarName').textContent = admin.name;
-            document.getElementById('sidebarRole').textContent = roleLabel;
-            document.getElementById('sidebarAvatar').textContent = initials;
-            const topAvatar = document.getElementById('topAvatar');
-            if (topAvatar) topAvatar.textContent = initials;
-        }
-
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            sidebar.classList.toggle('-translate-x-full');
-            overlay.classList.toggle('hidden');
-        }
-
-        function handleLogout() {
-            sessionStorage.removeItem('pz_admin_session');
-            window.location.href = 'admin-login.html';
-        }
-
-        function showLogoutModal() {
-            const modal = document.getElementById('logoutModal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        }
-
-        function closeLogoutModal() {
-            const modal = document.getElementById('logoutModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        }
-
-        function confirmLogout() {
-            closeLogoutModal();
-            setTimeout(() => {
-                sessionStorage.removeItem('pz_admin_session');
-                window.location.href = 'admin-login.html';
-            }, 300);
-        }
-
-        const admin = checkSession();
-        if (admin) { populateAdminInfo(admin); }
+    <script type="module">
+        import { checkAdminSession, renderSidebar } from './admin-layout.js';
+        
+        // 1. Enforce Admin Session
+        checkAdminSession();
+        
+        // 2. Render Sidebar Navigation
+        renderSidebar('dashboard');
     </script>
 </body>
 </html>

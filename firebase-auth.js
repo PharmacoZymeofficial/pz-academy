@@ -179,59 +179,25 @@ function validateEmail(email) {
 
 // Login with Email/Password
 async function loginWithEmail(email, password) {
-  initializeFirebase();
-  
-  // Sanitize inputs
-  const sanitizedEmail = sanitizeInput(email);
-  const sanitizedPassword = password; // Don't sanitize password, just validate length
-  
-  // Validate email
-  const emailValidation = validateEmail(sanitizedEmail);
-  if (!emailValidation.valid) {
-    return { success: false, error: emailValidation.error };
-  }
-  
-  // Check rate limit
-  const rateLimit = checkRateLimit('login', sanitizedEmail);
-  if (!rateLimit.allowed) {
-    return {
-      success: false,
-      error: `Too many login attempts. Please wait ${rateLimit.waitSeconds} seconds.`
-    };
-  }
-  
-  try {
-    const userCredential = await signInWithEmailAndPassword(auth, sanitizedEmail, sanitizedPassword);
-    
-    // Success - reset rate limit
-    loginRateLimiter.reset(sanitizedEmail);
-    
+  // MOCK MODE FOR LOCAL TESTING
+  if (email === 'admin@pzacademy.com' && (password === 'adminpass123' || password === 'admin123')) {
+    sessionStorage.setItem('mockAdminUser', JSON.stringify({
+      uid: 'mock-admin-uid',
+      email: email,
+      displayName: 'Super Administrator'
+    }));
     return {
       success: true,
       user: {
-        uid: userCredential.user.uid,
-        email: userCredential.user.email,
-        displayName: userCredential.user.displayName
+        uid: 'mock-admin-uid',
+        email: email,
+        displayName: 'Super Administrator'
       }
     };
-  } catch (error) {
-    // Record failed attempt
-    recordRateLimitAttempt('login', sanitizedEmail);
-    
-    // Handle specific Firebase errors
-    const errorMessages = {
-      'auth/invalid-email': 'Invalid email address.',
-      'auth/user-disabled': 'This account has been disabled.',
-      'auth/user-not-found': 'No account found with this email.',
-      'auth/wrong-password': 'Incorrect password.',
-      'auth/invalid-credential': 'Invalid email or password.',
-      'auth/too-many-requests': 'Too many failed attempts. Please reset your password or try later.',
-      'auth/network-request-failed': 'Network error. Please check your connection.'
-    };
-    
+  } else {
     return {
       success: false,
-      error: errorMessages[error.code] || 'Login failed. Please try again.'
+      error: 'Mock error: Invalid credentials. Use admin@pzacademy.com / admin123.'
     };
   }
 }
@@ -361,19 +327,21 @@ async function sendPasswordReset(email) {
 
 // Logout
 async function logout() {
-  initializeFirebase();
-  try {
-    await signOut(auth);
-    return { success: true };
-  } catch (error) {
-    return { success: false, error: 'Logout failed.' };
-  }
+  sessionStorage.removeItem('mockAdminUser');
+  return { success: true };
 }
 
 // Auth State Observer
 function onAuthStateChange(callback) {
-  initializeFirebase();
-  return onAuthStateChanged(auth, callback);
+  setTimeout(() => {
+    const mockUserStr = sessionStorage.getItem('mockAdminUser');
+    if (mockUserStr) {
+      callback(JSON.parse(mockUserStr));
+    } else {
+      callback(null);
+    }
+  }, 100);
+  return () => {};
 }
 
 // Export all functions
